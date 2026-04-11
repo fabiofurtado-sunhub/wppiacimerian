@@ -1,0 +1,28 @@
+import { Redis } from '@upstash/redis';
+
+export interface Session {
+  active: boolean;
+  leadName: string;
+  phone: string;
+  history: { role: 'user' | 'assistant'; content: string }[];
+}
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const SESSION_TTL = 60 * 60 * 2; // 2 horas
+
+export async function getSession(phone: string): Promise<Session> {
+  const data = await redis.get<Session>(`session:${phone}`);
+  return data ?? { active: false, leadName: '', phone, history: [] };
+}
+
+export async function saveSession(phone: string, session: Session): Promise<void> {
+  await redis.set(`session:${phone}`, session, { ex: SESSION_TTL });
+}
+
+export async function clearSession(phone: string): Promise<void> {
+  await redis.del(`session:${phone}`);
+}

@@ -1,0 +1,19 @@
+{
+  "name": "wppiacimerian",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@upstash/redis": "^1.28.0",
+    "googleapis": "^140.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vercel": "^34.0.0"
+  }
+}
