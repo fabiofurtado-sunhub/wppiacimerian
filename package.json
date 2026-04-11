@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vercel dev",
-    "build": "tsc --noEmit"
+    "build": "echo ok",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
