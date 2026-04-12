@@ -18,9 +18,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const keys: string[] = [];
   let cursor = 0;
   do {
-    const [next, batch] = await redis.scan(cursor, { match: 'session:*', count: 100 });
-    cursor = next;
-    keys.push(...batch);
+    const result = await redis.scan(cursor, { match: 'session:*', count: 100 });
+    cursor = Number(result[0]); // Upstash returns cursor as string; Number() fixes TS error
+    keys.push(...result[1]);
   } while (cursor !== 0);
 
   if (keys.length === 0) return res.status(200).json([]);
