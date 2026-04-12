@@ -93,6 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       session.utm_content = '';
 
       // MOMENTO 1 — salva lead ao entrar no funil
+      console.log('[sheets] MOMENTO 1 - iniciando upsert gatilho');
       await upsertLead({
         phone,
         nome: name,
@@ -110,7 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (leadData) {
       // MOMENTO 3 — encerramento: salva dados completos
-      console.log('[webhook] chamando upsertLead (encerramento)...');
+      console.log('[sheets] MOMENTO 3 - leadData final:', JSON.stringify(leadData));
       await upsertLead({
         ...leadData,
         phone,
@@ -124,8 +125,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else {
       // MOMENTO 2 — mid-conversation: salva dados parciais se nome já foi coletado
       const partialData = await extractPartialData(sessionUpdated.history);
+      console.log('[sheets] MOMENTO 2 - partialData:', JSON.stringify(partialData));
       if (partialData) {
-        console.log('[webhook] chamando upsertLead (parcial)...');
         await upsertLead({
           ...partialData,
           phone,
