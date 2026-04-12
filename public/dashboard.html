@@ -5,81 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cimerian — Painel Comercial</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
-  a { color: inherit; text-decoration: none; }
-  /* Login */
-  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .login-box { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; }
-  .login-box h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-  .login-box p { color: #666; margin-bottom: 28px; font-size: 13px; }
-  .login-box label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; }
-  .login-box input { width: 100%; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 12px; color: #e5e5e5; font-size: 14px; outline: none; margin-bottom: 16px; }
-  .login-box input:focus { border-color: #dc2626; }
-  .login-box button { width: 100%; background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .login-box button:hover { background: #b91c1c; }
-  .login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
-  #login-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
-  /* App */
-  #app-screen { display: none; }
-  .topbar { background: #111; border-bottom: 1px solid #1f1f1f; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-  .topbar .brand { font-weight: 700; font-size: 16px; color: #fff; }
-  .topbar .brand span { color: #dc2626; }
-  .topbar .user-info { display: flex; align-items: center; gap: 12px; color: #888; font-size: 13px; }
-  .topbar .logout-btn { background: none; border: 1px solid #333; border-radius: 6px; padding: 5px 12px; color: #888; cursor: pointer; font-size: 12px; }
-  .topbar .logout-btn:hover { border-color: #dc2626; color: #dc2626; }
-  .tabs { background: #0f0f0f; border-bottom: 1px solid #1f1f1f; padding: 0 24px; display: flex; gap: 4px; }
-  .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 14px 16px; color: #666; cursor: pointer; font-size: 13px; font-weight: 500; }
-  .tab-btn.active { color: #fff; border-bottom-color: #dc2626; }
-  .tab-btn:hover:not(.active) { color: #aaa; }
-  .tab-panel { display: none; padding: 24px; }
-  .tab-panel.active { display: block; }
-  /* Metrics */
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-  .metric-card { background: #141414; border: 1px solid #222; border-radius: 10px; padding: 20px; }
-  .metric-card .label { font-size: 12px; color: #666; margin-bottom: 8px; }
-  .metric-card .value { font-size: 28px; font-weight: 700; color: #fff; }
-  .metric-card .value.accent { color: #dc2626; }
-  /* Table */
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .section-header h2 { font-size: 15px; font-weight: 600; color: #fff; }
-  .refresh-btn { background: none; border: 1px solid #333; border-radius: 6px; padding: 5px 12px; color: #888; cursor: pointer; font-size: 12px; }
-  .refresh-btn:hover { border-color: #555; color: #ccc; }
-  .table-wrap { background: #141414; border: 1px solid #1f1f1f; border-radius: 10px; overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; }
-  thead th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1f1f1f; }
-  tbody tr { border-bottom: 1px solid #1a1a1a; cursor: pointer; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #1a1a1a; }
-  tbody td { padding: 12px 16px; color: #ccc; }
-  tbody td.phone { font-family: monospace; font-size: 13px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .badge-active { background: #14532d; color: #4ade80; }
-  .badge-closed { background: #1c1c1c; color: #555; }
-  .badge-tag { background: #1e1b4b; color: #a5b4fc; }
-  .loading { text-align: center; color: #444; padding: 40px; }
-  .empty { text-align: center; color: #444; padding: 40px; font-size: 13px; }
-  /* Modal */
-  #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; overflow-y: auto; padding: 24px; }
-  #modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
-  .modal { background: #141414; border: 1px solid #222; border-radius: 12px; width: 100%; max-width: 560px; padding: 24px; }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .modal-header h3 { font-size: 15px; font-weight: 600; color: #fff; }
-  .modal-close { background: none; border: none; color: #555; cursor: pointer; font-size: 20px; line-height: 1; }
-  .modal-close:hover { color: #ccc; }
-  .chat-messages { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .msg { padding: 8px 12px; border-radius: 8px; max-width: 85%; font-size: 13px; line-height: 1.5; word-break: break-word; }
-  .msg.user { background: #1e293b; color: #cbd5e1; align-self: flex-start; }
-  .msg.assistant { background: #1a0000; color: #fca5a5; align-self: flex-end; border: 1px solid #2d0000; }
-  .msg .role-label { font-size: 10px; color: #555; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
-  /* Tag breakdown */
-  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .tag-item { background: #1e1b4b; border: 1px solid #312e81; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #a5b4fc; }
-  .tag-item span { color: #fff; font-weight: 700; margin-left: 6px; }
-  /* Leads table extras */
-  .leads-filter { display: flex; gap: 8px; margin-bottom: 16px; }
-  .leads-filter input { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; padding: 7px 12px; color: #e5e5e5; font-size: 13px; outline: none; width: 220px; }
-  .leads-filter input:focus { border-color: #dc2626; }
+/* ---- RESET ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; background: #111b21; color: #e9edef; }
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+input { font: inherit; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
+
+/* ---- LOGIN ---- */
+#login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.login-box { background: #202c33; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; }
+.login-box h1 { font-size: 22px; font-weight: 700; color: #e9edef; margin-bottom: 4px; }
+.login-box h1 span { color: #00a884; }
+.login-box p { font-size: 13px; color: #8696a0; margin-bottom: 28px; }
+.login-box label { display: block; font-size: 12px; color: #8696a0; margin-bottom: 6px; }
+.login-box input { width: 100%; background: #2a3942; border: 1px solid #374045; border-radius: 8px; padding: 10px 12px; color: #e9edef; outline: none; margin-bottom: 14px; }
+.login-box input:focus { border-color: #00a884; }
+.login-box input::placeholder { color: #8696a0; }
+.login-box button { width: 100%; background: #00a884; color: #fff; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600; }
+.login-box button:hover { background: #017d62; }
+.login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
+#login-error { color: #f87171; font-size: 13px; margin-top: 10px; display: none; }
+
+/* ---- APP SHELL ---- */
+#app-screen { height: 100vh; overflow: hidden; }
+.app-layout { display: flex; height: 100%; }
+
+/* ---- SIDEBAR ---- */
+.sidebar { width: 320px; flex-shrink: 0; background: #202c33; display: flex; flex-direction: column; border-right: 1px solid #374045; }
+.sidebar-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #374045; flex-shrink: 0; }
+.brand { font-size: 17px; font-weight: 700; color: #e9edef; }
+.brand span { color: #00a884; }
+.sidebar-user { display: flex; align-items: center; gap: 10px; }
+.sidebar-user span { font-size: 12px; color: #8696a0; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logout-btn { font-size: 12px; color: #8696a0; padding: 4px 10px; border: 1px solid #374045; border-radius: 6px; }
+.logout-btn:hover { border-color: #00a884; color: #00a884; }
+.sidebar-search-wrap { padding: 8px 12px; flex-shrink: 0; border-bottom: 1px solid #1a2228; }
+.sidebar-search { width: 100%; background: #2a3942; border: none; border-radius: 8px; padding: 8px 12px; color: #e9edef; outline: none; font-size: 13px; }
+.sidebar-search::placeholder { color: #8696a0; }
+
+/* ---- CONVERSATIONS IN SIDEBAR ---- */
+/* No tab-panel class — always visible, not affected by switchTab() */
+#tab-conversations { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.conv-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; flex-shrink: 0; }
+.conv-header span { font-size: 11px; font-weight: 600; color: #8696a0; text-transform: uppercase; letter-spacing: 0.05em; }
+.btn-icon { font-size: 16px; color: #8696a0; padding: 2px 6px; border-radius: 4px; }
+.btn-icon:hover { color: #00a884; background: #2a3942; }
+.conv-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* Conversations table — rendered as list via CSS */
+.conv-scroll table { display: block; width: 100%; }
+.conv-scroll thead { display: none; }
+.conv-scroll tbody { display: block; }
+
+/* Each conversation row as WhatsApp-style list item */
+.conv-scroll tbody tr {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  grid-template-rows: 20px 16px;
+  column-gap: 10px;
+  row-gap: 3px;
+  padding: 10px 14px 10px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #1a2228;
+  border-left: 3px solid transparent;
+  align-items: center;
+}
+.conv-scroll tbody tr:hover { background: #2a3942; }
+
+/* Avatar circle via ::before */
+.conv-scroll tbody tr::before {
+  content: '';
+  grid-column: 1; grid-row: 1 / 3;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  align-self: center;
+  background: #00a884;
+}
+.conv-scroll tbody tr:nth-child(7n+2)::before { background: #f59e0b; }
+.conv-scroll tbody tr:nth-child(7n+3)::before { background: #3b82f6; }
+.conv-scroll tbody tr:nth-child(7n+4)::before { background: #8b5cf6; }
+.conv-scroll tbody tr:nth-child(7n+5)::before { background: #ef4444; }
+.conv-scroll tbody tr:nth-child(7n+6)::before { background: #06b6d4; }
+.conv-scroll tbody tr:nth-child(7n)::before   { background: #f97316; }
+
+/* td: phone → hidden */
+.conv-scroll td:nth-child(1) { display: none; }
+/* td: name → row 1 col 2 */
+.conv-scroll td:nth-child(2) { grid-column: 2; grid-row: 1; font-size: 14px; font-weight: 500; color: #e9edef; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: end; }
+/* td: tag → row 1 col 3 */
+.conv-scroll td:nth-child(3) { grid-column: 3; grid-row: 1; align-self: end; }
+/* td: status → row 2 col 3 */
+.conv-scroll td:nth-child(4) { grid-column: 3; grid-row: 2; align-self: start; }
+/* td: messageCount → hidden */
+.conv-scroll td:nth-child(5) { display: none; }
+/* td: lastMessage → row 2 col 2 */
+.conv-scroll td:nth-child(6) { grid-column: 2; grid-row: 2; font-size: 12px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: start; }
+
+/* Loading / empty row overrides grid */
+.conv-scroll tbody tr:only-child { display: block !important; }
+
+/* ---- BADGES ---- */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.badge-active  { background: rgba(245,158,11,0.15); color: #f59e0b; }   /* em andamento */
+.badge-closed  { background: rgba(134,150,160,0.15); color: #8696a0; }  /* encerrado */
+.badge-tag     { background: rgba(59,130,246,0.15);  color: #5b8dee; }  /* tag */
+
+/* ---- MAIN AREA ---- */
+.main-area { flex: 1; background: #0b141a; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Tabs — Métricas | [hidden Conversas] | Leads */
+.main-tabs { background: #202c33; display: flex; border-bottom: 1px solid #374045; flex-shrink: 0; }
+.tab-btn { padding: 14px 24px; font-size: 14px; color: #8696a0; border-bottom: 2px solid transparent; }
+.tab-btn.active { color: #00a884; border-bottom-color: #00a884; }
+.tab-btn:hover:not(.active) { color: #e9edef; background: #2a3942; }
+
+/* Tab panels */
+.tab-panel { display: none; flex: 1; overflow-y: auto; padding: 24px; flex-direction: column; }
+.tab-panel.active { display: flex; }
+
+/* Panel header */
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-shrink: 0; }
+.panel-header h2 { font-size: 16px; font-weight: 600; color: #e9edef; }
+.refresh-btn { font-size: 12px; color: #8696a0; padding: 5px 12px; border: 1px solid #374045; border-radius: 6px; }
+.refresh-btn:hover { border-color: #00a884; color: #00a884; }
+
+/* ---- METRICS ---- */
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.metric-card { background: #202c33; border-radius: 10px; padding: 20px; }
+.metric-card .label { font-size: 12px; color: #8696a0; margin-bottom: 8px; }
+.metric-card .value { font-size: 28px; font-weight: 700; color: #e9edef; }
+.metric-card .value.accent { color: #00a884; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-item { background: #202c33; border: 1px solid #374045; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #8696a0; }
+.tag-item span { color: #00a884; font-weight: 700; margin-left: 6px; }
+
+/* ---- LEADS TABLE ---- */
+.leads-filter { margin-bottom: 14px; flex-shrink: 0; }
+.leads-filter input { background: #202c33; border: 1px solid #374045; border-radius: 8px; padding: 8px 12px; color: #e9edef; font-size: 13px; outline: none; width: 280px; }
+.leads-filter input:focus { border-color: #00a884; }
+.leads-filter input::placeholder { color: #8696a0; }
+.table-wrap { background: #202c33; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+table { width: 100%; border-collapse: collapse; }
+thead th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: #8696a0; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #374045; }
+tbody tr { border-bottom: 1px solid #1a2228; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #1a2a33; }
+tbody td { padding: 10px 14px; color: #e9edef; font-size: 13px; }
+tbody td.phone { font-family: monospace; font-size: 12px; color: #8696a0; }
+
+/* ---- LOADING / EMPTY ---- */
+.loading { text-align: center; color: #8696a0; padding: 32px 16px; font-size: 13px; }
+.empty   { text-align: center; color: #8696a0; padding: 32px 16px; font-size: 13px; }
+
+/* ---- MODAL (chat history) ---- */
+#modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+#modal-overlay.open { display: flex; }
+.modal { background: #0b141a; border-radius: 12px; width: 100%; max-width: 680px; height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { background: #202c33; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid #374045; }
+.modal-header h3 { font-size: 15px; font-weight: 600; color: #e9edef; }
+.modal-close { font-size: 22px; color: #8696a0; padding: 0 4px; line-height: 1; }
+.modal-close:hover { color: #e9edef; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; background: #0b141a; }
+.msg { padding: 8px 12px; border-radius: 8px; max-width: 65%; font-size: 13px; line-height: 1.5; word-break: break-word; }
+.msg.user      { background: #202c33; color: #e9edef; align-self: flex-start; border-radius: 0 8px 8px 8px; }
+.msg.assistant { background: #005c4b; color: #e9edef; align-self: flex-end;   border-radius: 8px 0 8px 8px; }
+.msg .role-label { font-size: 10px; color: #8696a0; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -87,7 +181,7 @@
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <h1>Cimerian</h1>
+    <h1>Cimerian <span>·</span></h1>
     <p>Painel Comercial — acesso restrito</p>
     <label for="email">E-mail</label>
     <input type="email" id="email" placeholder="seu@email.com" autocomplete="username">
@@ -100,91 +194,95 @@
 
 <!-- APP -->
 <div id="app-screen">
-  <div class="topbar">
-    <div class="brand">Cimerian <span>·</span> Painel</div>
-    <div class="user-info">
-      <span id="user-name"></span>
-      <button class="logout-btn" onclick="doLogout()">Sair</button>
-    </div>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('metrics')">Métricas</button>
-    <button class="tab-btn" onclick="switchTab('conversations')">Conversas</button>
-    <button class="tab-btn" onclick="switchTab('leads')">Leads</button>
-  </div>
+  <div class="app-layout">
 
-  <!-- METRICS -->
-  <div id="tab-metrics" class="tab-panel active">
-    <div class="section-header">
-      <h2>Visão Geral</h2>
-      <button class="refresh-btn" onclick="loadMetrics()">Atualizar</button>
-    </div>
-    <div class="metrics-grid" id="metrics-grid">
-      <div class="loading">Carregando...</div>
-    </div>
-    <div id="tag-breakdown-section" style="display:none;">
-      <h2 style="font-size:14px;color:#888;margin-bottom:10px;">Distribuição por Tag</h2>
-      <div class="tag-list" id="tag-list"></div>
-    </div>
-  </div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">Cimerian <span>·</span></div>
+        <div class="sidebar-user">
+          <span id="user-name"></span>
+          <button class="logout-btn" onclick="doLogout()">Sair</button>
+        </div>
+      </div>
+      <div class="sidebar-search-wrap">
+        <input type="search" class="sidebar-search" placeholder="🔍  Buscar conversa...">
+      </div>
+      <!-- NO tab-panel class — stays visible regardless of active tab -->
+      <div id="tab-conversations">
+        <div class="conv-header">
+          <span>Conversas</span>
+          <button class="btn-icon" onclick="loadConversations()" title="Atualizar">↻</button>
+        </div>
+        <div class="conv-scroll">
+          <table>
+            <thead>
+              <tr><th>Telefone</th><th>Nome</th><th>Tag</th><th>Status</th><th>Msgs</th><th>Última mensagem</th></tr>
+            </thead>
+            <tbody id="conv-tbody">
+              <tr><td colspan="6" class="loading">Clique em ↻ para carregar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </aside>
 
-  <!-- CONVERSATIONS -->
-  <div id="tab-conversations" class="tab-panel">
-    <div class="section-header">
-      <h2>Conversas</h2>
-      <button class="refresh-btn" onclick="loadConversations()">Atualizar</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Telefone</th>
-            <th>Nome</th>
-            <th>Tag</th>
-            <th>Status</th>
-            <th>Mensagens</th>
-            <th>Última mensagem</th>
-          </tr>
-        </thead>
-        <tbody id="conv-tbody">
-          <tr><td colspan="6" class="loading">Carregando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <!-- MAIN AREA -->
+    <div class="main-area">
+      <!--
+        Tab-btn indexes must match JS: ['metrics', 'conversations', 'leads']
+        Index 1 (conversations) is hidden — sidebar handles conversations
+      -->
+      <div class="main-tabs">
+        <button class="tab-btn active" onclick="switchTab('metrics')">Métricas</button>
+        <button class="tab-btn" onclick="switchTab('conversations')" style="display:none" aria-hidden="true"></button>
+        <button class="tab-btn" onclick="switchTab('leads')">Leads</button>
+      </div>
 
-  <!-- LEADS -->
-  <div id="tab-leads" class="tab-panel">
-    <div class="section-header">
-      <h2>Leads (Sheets)</h2>
-      <button class="refresh-btn" onclick="loadLeads()">Atualizar</button>
-    </div>
-    <div class="leads-filter">
-      <input type="text" id="lead-search" placeholder="Buscar por nome ou telefone..." oninput="filterLeads()">
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Telefone</th>
-            <th>Nome</th>
-            <th>Cidade/UF</th>
-            <th>Perfil</th>
-            <th>Tag</th>
-            <th>Status</th>
-            <th>Agendamento</th>
-          </tr>
-        </thead>
-        <tbody id="leads-tbody">
-          <tr><td colspan="8" class="loading">Carregando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+      <!-- METRICS -->
+      <div id="tab-metrics" class="tab-panel active">
+        <div class="panel-header">
+          <h2>Visão Geral</h2>
+          <button class="refresh-btn" onclick="loadMetrics()">Atualizar</button>
+        </div>
+        <div class="metrics-grid" id="metrics-grid">
+          <div class="loading">Carregando...</div>
+        </div>
+        <div id="tag-breakdown-section" style="display:none;">
+          <h2 style="font-size:13px;color:#8696a0;margin-bottom:10px;">Distribuição por Tag</h2>
+          <div class="tag-list" id="tag-list"></div>
+        </div>
+      </div>
 
-<!-- MODAL -->
+      <!-- LEADS -->
+      <div id="tab-leads" class="tab-panel">
+        <div class="panel-header">
+          <h2>Leads</h2>
+          <button class="refresh-btn" onclick="loadLeads()">Atualizar</button>
+        </div>
+        <div class="leads-filter">
+          <input type="text" id="lead-search" placeholder="Buscar por nome ou telefone..." oninput="filterLeads()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th><th>Telefone</th><th>Nome</th><th>Cidade/UF</th>
+                <th>Perfil</th><th>Tag</th><th>Status</th><th>Agendamento</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody">
+              <tr><td colspan="8" class="loading">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- .main-area -->
+
+  </div><!-- .app-layout -->
+</div><!-- #app-screen -->
+
+<!-- MODAL — chat history overlay -->
 <div id="modal-overlay" onclick="closeModalOutside(event)">
   <div class="modal" id="modal-box">
     <div class="modal-header">
@@ -255,6 +353,7 @@
     document.getElementById('app-screen').style.display = 'block';
     document.getElementById('user-name').textContent = userName;
     loadMetrics();
+    loadConversations();
   }
 
   function switchTab(name) {
@@ -392,14 +491,14 @@
     }
     tbody.innerHTML = list.map(l => `
       <tr>
-        <td style="color:#666;font-size:12px">${esc(l.timestamp || '—')}</td>
+        <td style="color:#8696a0;font-size:12px">${esc(l.timestamp || '—')}</td>
         <td class="phone">${esc(l.telefone || '—')}</td>
         <td>${esc(l.nome || '—')}</td>
-        <td>${esc([l.cidade, l.estado].filter(Boolean).join('/') || '—')}</td>
-        <td>${esc(l.perfil || '—')}</td>
+        <td style="color:#8696a0">${esc([l.cidade, l.estado].filter(Boolean).join('/') || '—')}</td>
+        <td style="color:#8696a0">${esc(l.perfil || '—')}</td>
         <td>${l.tag ? '<span class="badge badge-tag">' + esc(l.tag) + '</span>' : '—'}</td>
         <td>${esc(l.status || '—')}</td>
-        <td style="font-size:12px;color:#aaa">${esc(l.agendamento || '—')}</td>
+        <td style="font-size:12px;color:#8696a0">${esc(l.agendamento || '—')}</td>
       </tr>
     `).join('');
   }
