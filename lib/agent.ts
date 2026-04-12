@@ -63,6 +63,7 @@ export async function extractPartialData(
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 256,
       system: `Você é um extrator de dados parciais. Analise a conversa e retorne SOMENTE um JSON válido com os campos coletados até agora. Campos ainda desconhecidos deixe como string vazia. Se nenhum dado relevante foi coletado além da saudação, retorne exatamente: null
+Cidade e estado devem ser sempre separados em campos distintos. Exemplos: "Londrina PR" → cidade: "Londrina", estado: "PR" | "Londrina, Paraná" → cidade: "Londrina", estado: "PR" | "São Paulo SP" → cidade: "São Paulo", estado: "SP" | "Belo Horizonte - MG" → cidade: "Belo Horizonte", estado: "MG". Use sempre a sigla de 2 letras maiúsculas para estado.
 Formato:
 {"nome":"","cidade":"","estado":"","perfil":"","nome_academia":"","proprietario":"","faturamento_mensal":"","interesse_equipamento":""}`,
       messages: [{ role: 'user', content: `Conversa: ${JSON.stringify(history)}` }],
@@ -92,6 +93,7 @@ async function extractLeadData(
       max_tokens: 512,
       system: `Você é um extrator de dados. Analise a conversa e retorne SOMENTE um JSON válido, sem texto adicional, sem markdown, sem backticks.
 O campo faturamento_mensal deve ser sempre um número inteiro em reais, sem símbolos. Exemplos de conversão: "cinquenta mil" → 50000, "R$50k" → 50000, "50 mil reais" → 50000, "250.000" → 250000, "não informado" → 0.
+Cidade e estado devem ser sempre separados em campos distintos. Exemplos: "Londrina PR" → cidade: "Londrina", estado: "PR" | "Londrina, Paraná" → cidade: "Londrina", estado: "PR" | "São Paulo SP" → cidade: "São Paulo", estado: "SP" | "Belo Horizonte - MG" → cidade: "Belo Horizonte", estado: "MG". Use sempre a sigla de 2 letras maiúsculas para estado.
 Campos obrigatórios:
 {
   "nome": "",
