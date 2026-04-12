@@ -104,7 +104,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const { reply, sessionUpdated, leadData } = await handleMessage(text, session);
+    const now = new Date().toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'long',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+    const isWeekend = [0, 6].includes(new Date().getDay());
+
+    const { reply, sessionUpdated, leadData } = await handleMessage(text, session, now, isWeekend);
 
     await saveSession(phone, sessionUpdated);
     await sendMessage(phone, reply);

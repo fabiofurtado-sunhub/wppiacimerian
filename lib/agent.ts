@@ -12,14 +12,24 @@ interface HandleResult {
 
 export async function handleMessage(
   text: string,
-  session: Session
+  session: Session,
+  currentDateTime: string,
+  isWeekend: boolean
 ): Promise<HandleResult> {
   const history = [...session.history, { role: 'user' as const, content: text }];
+
+  const systemWithContext = `${SYSTEM_PROMPT}
+
+[CONTEXTO ATUAL DO SISTEMA]
+Data e hora atual: ${currentDateTime}
+É fim de semana: ${isWeekend ? 'SIM' : 'NÃO'}
+${isWeekend ? 'ATENÇÃO: Hoje é fim de semana. NÃO ofereça contato imediato. NÃO ofereça horários de hoje ou amanhã se cair no fim de semana. Ofereça APENAS segunda-feira.' : ''}
+`;
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 512,
-    system: SYSTEM_PROMPT,
+    system: systemWithContext,
     messages: history,
   });
 
