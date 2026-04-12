@@ -84,6 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Inicia sessão
       session.active = true;
       session.leadName = name;
+      session.nomeWhatsapp = name; // fallback: nome do WhatsApp, será substituído pelo nome real informado na conversa
       session.phone = phone;
       session.history = [];
       session.tag = getTriggerTag(text);
@@ -92,11 +93,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       session.utm_campaign = '';
       session.utm_content = '';
 
-      // MOMENTO 1 — salva lead ao entrar no funil
+      // MOMENTO 1 — salva lead ao entrar no funil (nome vazio: será preenchido pela IA durante a conversa)
       console.log('[sheets] MOMENTO 1 - iniciando upsert gatilho');
       await upsertLead({
         phone,
-        nome: name,
+        nome: '',
+        nomeWhatsapp: name,
         tag: session.tag,
         status: 'iniciado',
       });
@@ -115,6 +117,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await upsertLead({
         ...leadData,
         phone,
+        nomeWhatsapp: session.nomeWhatsapp || '',
         tag: session.tag || '',
         utm_source: session.utm_source || '',
         utm_medium: session.utm_medium || '',
@@ -122,14 +125,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         utm_content: session.utm_content || '',
       });
       await clearSession(phone);
-    } else {
-      // MOMENTO 2 — mid-conversation: salva dados parciais se nome já foi coletado
+    } else if (sessionUpdated.history.length >= 6) {
+      // MOMENTO 2 — mid-conversation: só executa com 6+ mensagens e se nome já foi coletado
       const partialData = await extractPartialData(sessionUpdated.history);
       console.log('[sheets] MOMENTO 2 - partialData:', JSON.stringify(partialData));
       if (partialData) {
         await upsertLead({
           ...partialData,
           phone,
+          nomeWhatsapp: session.nomeWhatsapp || '',
           tag: session.tag || '',
           utm_source: session.utm_source || '',
           utm_medium: session.utm_medium || '',

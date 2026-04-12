@@ -3,6 +3,7 @@ import { Redis } from '@upstash/redis';
 export interface Session {
   active: boolean;
   leadName: string;
+  nomeWhatsapp: string;
   phone: string;
   history: { role: 'user' | 'assistant'; content: string }[];
   tag: string;
@@ -21,7 +22,7 @@ const SESSION_TTL = 60 * 60 * 2; // 2 horas
 
 export async function getSession(phone: string): Promise<Session> {
   const data = await redis.get<Session>(`session:${phone}`);
-  return data ?? { active: false, leadName: '', phone, history: [], tag: '', utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '' };
+  return data ?? { active: false, leadName: '', nomeWhatsapp: '', phone, history: [], tag: '', utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '' };
 }
 
 export async function saveSession(phone: string, session: Session): Promise<void> {

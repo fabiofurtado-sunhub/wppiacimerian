@@ -22,12 +22,15 @@ export async function upsertLead(lead: Record<string, string>): Promise<void> {
     });
 
     const rows = existing.data.values || [];
-    const rowIndex = rows.findIndex((r) => r[0] === lead.phone);
+    const rowIndex = rows.findIndex((r, i) => i > 0 && r[0] === lead.phone);
+    console.log('[sheets] buscando phone:', lead.phone, '| rowIndex:', rowIndex, '| total rows:', rows.length);
+
+    const nomeParaSalvar = (lead.nome && lead.nome.trim() !== '') ? lead.nome : (lead.nomeWhatsapp || '');
 
     const row = [
       lead.timestamp || now,
       lead.phone || '',
-      lead.nome || '',
+      nomeParaSalvar,
       lead.cidade || '',
       lead.estado || '',
       lead.perfil || '',
