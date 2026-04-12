@@ -24,17 +24,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = req.body;
+    console.log('[webhook] body recebido:', JSON.stringify(body));
 
     // Compatibilidade com formato ZAPI
     const phone: string =
       body?.phone ||
       body?.chatId?.replace('@c.us', '') ||
       body?.from?.replace('@c.us', '') ||
+      body?.sender?.replace('@c.us', '') ||
+      body?.data?.phone ||
       '';
     const text: string =
       body?.text?.message ||
-      body?.body ||
+      body?.message?.text ||
       body?.message ||
+      body?.body ||
+      body?.content ||
+      body?.data?.message ||
+      (typeof body?.text === 'string' ? body.text : '') ||
       '';
     const name: string =
       body?.senderName ||
