@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cimerian — Painel Comercial</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
+  a { color: inherit; text-decoration: none; }
+  /* Login */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .login-box { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; }
+  .login-box h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .login-box p { color: #666; margin-bottom: 28px; font-size: 13px; }
+  .login-box label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; }
+  .login-box input { width: 100%; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 12px; color: #e5e5e5; font-size: 14px; outline: none; margin-bottom: 16px; }
+  .login-box input:focus { border-color: #dc2626; }
+  .login-box button { width: 100%; background: #dc2626; color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .login-box button:hover { background: #b91c1c; }
+  .login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
+  #login-error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
+  /* App */
+  #app-screen { display: none; }
+  .topbar { background: #111; border-bottom: 1px solid #1f1f1f; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar .brand { font-weight: 700; font-size: 16px; color: #fff; }
+  .topbar .brand span { color: #dc2626; }
+  .topbar .user-info { display: flex; align-items: center; gap: 12px; color: #888; font-size: 13px; }
+  .topbar .logout-btn { background: none; border: 1px solid #333; border-radius: 6px; padding: 5px 12px; color: #888; cursor: pointer; font-size: 12px; }
+  .topbar .logout-btn:hover { border-color: #dc2626; color: #dc2626; }
+  .tabs { background: #0f0f0f; border-bottom: 1px solid #1f1f1f; padding: 0 24px; display: flex; gap: 4px; }
+  .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 14px 16px; color: #666; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .tab-btn.active { color: #fff; border-bottom-color: #dc2626; }
+  .tab-btn:hover:not(.active) { color: #aaa; }
+  .tab-panel { display: none; padding: 24px; }
+  .tab-panel.active { display: block; }
+  /* Metrics */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .metric-card { background: #141414; border: 1px solid #222; border-radius: 10px; padding: 20px; }
+  .metric-card .label { font-size: 12px; color: #666; margin-bottom: 8px; }
+  .metric-card .value { font-size: 28px; font-weight: 700; color: #fff; }
+  .metric-card .value.accent { color: #dc2626; }
+  /* Table */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-header h2 { font-size: 15px; font-weight: 600; color: #fff; }
+  .refresh-btn { background: none; border: 1px solid #333; border-radius: 6px; padding: 5px 12px; color: #888; cursor: pointer; font-size: 12px; }
+  .refresh-btn:hover { border-color: #555; color: #ccc; }
+  .table-wrap { background: #141414; border: 1px solid #1f1f1f; border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #1f1f1f; }
+  tbody tr { border-bottom: 1px solid #1a1a1a; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #1a1a1a; }
+  tbody td { padding: 12px 16px; color: #ccc; }
+  tbody td.phone { font-family: monospace; font-size: 13px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-active { background: #14532d; color: #4ade80; }
+  .badge-closed { background: #1c1c1c; color: #555; }
+  .badge-tag { background: #1e1b4b; color: #a5b4fc; }
+  .loading { text-align: center; color: #444; padding: 40px; }
+  .empty { text-align: center; color: #444; padding: 40px; font-size: 13px; }
+  /* Modal */
+  #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; overflow-y: auto; padding: 24px; }
+  #modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+  .modal { background: #141414; border: 1px solid #222; border-radius: 12px; width: 100%; max-width: 560px; padding: 24px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-header h3 { font-size: 15px; font-weight: 600; color: #fff; }
+  .modal-close { background: none; border: none; color: #555; cursor: pointer; font-size: 20px; line-height: 1; }
+  .modal-close:hover { color: #ccc; }
+  .chat-messages { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .msg { padding: 8px 12px; border-radius: 8px; max-width: 85%; font-size: 13px; line-height: 1.5; word-break: break-word; }
+  .msg.user { background: #1e293b; color: #cbd5e1; align-self: flex-start; }
+  .msg.assistant { background: #1a0000; color: #fca5a5; align-self: flex-end; border: 1px solid #2d0000; }
+  .msg .role-label { font-size: 10px; color: #555; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
+  /* Tag breakdown */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .tag-item { background: #1e1b4b; border: 1px solid #312e81; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #a5b4fc; }
+  .tag-item span { color: #fff; font-weight: 700; margin-left: 6px; }
+  /* Leads table extras */
+  .leads-filter { display: flex; gap: 8px; margin-bottom: 16px; }
+  .leads-filter input { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 6px; padding: 7px 12px; color: #e5e5e5; font-size: 13px; outline: none; width: 220px; }
+  .leads-filter input:focus { border-color: #dc2626; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Cimerian</h1>
+    <p>Painel Comercial — acesso restrito</p>
+    <label for="email">E-mail</label>
+    <input type="email" id="email" placeholder="seu@email.com" autocomplete="username">
+    <label for="password">Senha</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    <button id="login-btn" onclick="doLogin()">Entrar</button>
+    <div id="login-error">E-mail ou senha incorretos.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <div class="topbar">
+    <div class="brand">Cimerian <span>·</span> Painel</div>
+    <div class="user-info">
+      <span id="user-name"></span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('metrics')">Métricas</button>
+    <button class="tab-btn" onclick="switchTab('conversations')">Conversas</button>
+    <button class="tab-btn" onclick="switchTab('leads')">Leads</button>
+  </div>
+
+  <!-- METRICS -->
+  <div id="tab-metrics" class="tab-panel active">
+    <div class="section-header">
+      <h2>Visão Geral</h2>
+      <button class="refresh-btn" onclick="loadMetrics()">Atualizar</button>
+    </div>
+    <div class="metrics-grid" id="metrics-grid">
+      <div class="loading">Carregando...</div>
+    </div>
+    <div id="tag-breakdown-section" style="display:none;">
+      <h2 style="font-size:14px;color:#888;margin-bottom:10px;">Distribuição por Tag</h2>
+      <div class="tag-list" id="tag-list"></div>
+    </div>
+  </div>
+
+  <!-- CONVERSATIONS -->
+  <div id="tab-conversations" class="tab-panel">
+    <div class="section-header">
+      <h2>Conversas</h2>
+      <button class="refresh-btn" onclick="loadConversations()">Atualizar</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Telefone</th>
+            <th>Nome</th>
+            <th>Tag</th>
+            <th>Status</th>
+            <th>Mensagens</th>
+            <th>Última mensagem</th>
+          </tr>
+        </thead>
+        <tbody id="conv-tbody">
+          <tr><td colspan="6" class="loading">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div id="tab-leads" class="tab-panel">
+    <div class="section-header">
+      <h2>Leads (Sheets)</h2>
+      <button class="refresh-btn" onclick="loadLeads()">Atualizar</button>
+    </div>
+    <div class="leads-filter">
+      <input type="text" id="lead-search" placeholder="Buscar por nome ou telefone..." oninput="filterLeads()">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Telefone</th>
+            <th>Nome</th>
+            <th>Cidade/UF</th>
+            <th>Perfil</th>
+            <th>Tag</th>
+            <th>Status</th>
+            <th>Agendamento</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <tr><td colspan="8" class="loading">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Conversa</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="chat-messages" id="modal-chat"></div>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  let token = localStorage.getItem('cimerian_token') || '';
+  let userName = localStorage.getItem('cimerian_user') || '';
+  let allLeads = [];
+  let activeTab = 'metrics';
+
+  function init() {
+    if (token) {
+      showApp();
+    }
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    try {
+      const res = await fetch(API + '/api/dashboard/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro');
+      token = data.token;
+      userName = data.name || email;
+      localStorage.setItem('cimerian_token', token);
+      localStorage.setItem('cimerian_user', userName);
+      showApp();
+    } catch (e) {
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+  });
+
+  function doLogout() {
+    token = '';
+    userName = '';
+    localStorage.removeItem('cimerian_token');
+    localStorage.removeItem('cimerian_user');
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('user-name').textContent = userName;
+    loadMetrics();
+  }
+
+  function switchTab(name) {
+    activeTab = name;
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      const tabs = ['metrics', 'conversations', 'leads'];
+      b.classList.toggle('active', tabs[i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'metrics') loadMetrics();
+    if (name === 'conversations') loadConversations();
+    if (name === 'leads') loadLeads();
+  }
+
+  function authHeaders() {
+    return { 'Authorization': 'Bearer ' + token };
+  }
+
+  async function apiFetch(path) {
+    const res = await fetch(API + path, { headers: authHeaders() });
+    if (res.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  // ---- METRICS ----
+  async function loadMetrics() {
+    document.getElementById('metrics-grid').innerHTML = '<div class="loading">Carregando...</div>';
+    document.getElementById('tag-breakdown-section').style.display = 'none';
+    try {
+      const d = await apiFetch('/api/dashboard/metrics');
+      const grid = document.getElementById('metrics-grid');
+      grid.innerHTML = `
+        <div class="metric-card"><div class="label">Leads hoje</div><div class="value accent">${d.todayCount ?? 0}</div></div>
+        <div class="metric-card"><div class="label">Total de leads</div><div class="value">${d.totalLeads ?? 0}</div></div>
+        <div class="metric-card"><div class="label">Agendamentos</div><div class="value">${d.scheduledCount ?? 0}</div></div>
+        <div class="metric-card"><div class="label">Taxa conversão</div><div class="value">${d.conversionRate ?? '0%'}</div></div>
+      `;
+      if (d.tagBreakdown && Object.keys(d.tagBreakdown).length > 0) {
+        const tagEl = document.getElementById('tag-list');
+        tagEl.innerHTML = Object.entries(d.tagBreakdown)
+          .sort((a, b) => b[1] - a[1])
+          .map(([tag, count]) => `<div class="tag-item">${tag}<span>${count}</span></div>`)
+          .join('');
+        document.getElementById('tag-breakdown-section').style.display = 'block';
+      }
+    } catch (e) {
+      document.getElementById('metrics-grid').innerHTML = '<div class="empty">Erro ao carregar métricas.</div>';
+    }
+  }
+
+  // ---- CONVERSATIONS ----
+  async function loadConversations() {
+    document.getElementById('conv-tbody').innerHTML = '<tr><td colspan="6" class="loading">Carregando...</td></tr>';
+    try {
+      const list = await apiFetch('/api/dashboard/conversations');
+      const tbody = document.getElementById('conv-tbody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhuma conversa encontrada.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(c => `
+        <tr onclick="openConversation('${esc(c.phone)}', '${esc(c.leadName || c.phone)}')">
+          <td class="phone">${esc(c.phone)}</td>
+          <td>${esc(c.leadName || '—')}</td>
+          <td>${c.tag ? '<span class="badge badge-tag">' + esc(c.tag) + '</span>' : '—'}</td>
+          <td><span class="badge ${c.active ? 'badge-active' : 'badge-closed'}">${c.active ? 'Ativo' : 'Encerrado'}</span></td>
+          <td>${c.messageCount ?? 0}</td>
+          <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">${esc(c.lastMessage || '')}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      document.getElementById('conv-tbody').innerHTML = '<tr><td colspan="6" class="empty">Erro ao carregar conversas.</td></tr>';
+    }
+  }
+
+  async function openConversation(phone, name) {
+    document.getElementById('modal-title').textContent = name + ' · ' + phone;
+    document.getElementById('modal-chat').innerHTML = '<div class="loading">Carregando...</div>';
+    document.getElementById('modal-overlay').classList.add('open');
+    try {
+      const data = await apiFetch('/api/dashboard/conversation?phone=' + encodeURIComponent(phone));
+      const history = (data && data.history) ? data.history : [];
+      const chatEl = document.getElementById('modal-chat');
+      if (!history.length) {
+        chatEl.innerHTML = '<div class="empty">Sem mensagens.</div>';
+        return;
+      }
+      chatEl.innerHTML = history.map(m => `
+        <div class="msg ${m.role}">
+          <div class="role-label">${m.role === 'user' ? 'Lead' : 'Fabio IA'}</div>
+          ${esc(m.content)}
+        </div>
+      `).join('');
+      chatEl.scrollTop = chatEl.scrollHeight;
+    } catch (e) {
+      document.getElementById('modal-chat').innerHTML = '<div class="empty">Erro ao carregar conversa.</div>';
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  // ---- LEADS ----
+  async function loadLeads() {
+    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="loading">Carregando...</td></tr>';
+    try {
+      allLeads = await apiFetch('/api/dashboard/leads');
+      renderLeads(allLeads);
+    } catch (e) {
+      document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="empty">Erro ao carregar leads.</td></tr>';
+    }
+  }
+
+  function filterLeads() {
+    const q = document.getElementById('lead-search').value.toLowerCase();
+    if (!q) { renderLeads(allLeads); return; }
+    renderLeads(allLeads.filter(l =>
+      (l.nome || '').toLowerCase().includes(q) ||
+      (l.telefone || '').toLowerCase().includes(q)
+    ));
+  }
+
+  function renderLeads(list) {
+    const tbody = document.getElementById('leads-tbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum lead encontrado.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(l => `
+      <tr>
+        <td style="color:#666;font-size:12px">${esc(l.timestamp || '—')}</td>
+        <td class="phone">${esc(l.telefone || '—')}</td>
+        <td>${esc(l.nome || '—')}</td>
+        <td>${esc([l.cidade, l.estado].filter(Boolean).join('/') || '—')}</td>
+        <td>${esc(l.perfil || '—')}</td>
+        <td>${l.tag ? '<span class="badge badge-tag">' + esc(l.tag) + '</span>' : '—'}</td>
+        <td>${esc(l.status || '—')}</td>
+        <td style="font-size:12px;color:#aaa">${esc(l.agendamento || '—')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  init();
+</script>
+</body>
+</html>

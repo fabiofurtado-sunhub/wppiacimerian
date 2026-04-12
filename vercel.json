@@ -7,7 +7,7 @@
     { "src": "api/dashboard/conversation.ts",  "use": "@vercel/node" },
     { "src": "api/dashboard/leads.ts",         "use": "@vercel/node" },
     { "src": "api/dashboard/metrics.ts",       "use": "@vercel/node" },
-    { "src": "api/dashboard/ui.ts",            "use": "@vercel/node" }
+    { "src": "public/dashboard.html",          "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/webhook",                    "dest": "/api/webhook.ts"                 },
@@ -16,6 +16,6 @@
     { "src": "/api/dashboard/conversation",     "dest": "/api/dashboard/conversation.ts"  },
     { "src": "/api/dashboard/leads",            "dest": "/api/dashboard/leads.ts"         },
     { "src": "/api/dashboard/metrics",          "dest": "/api/dashboard/metrics.ts"       },
-    { "src": "/dashboard(/?.*)",                "dest": "/api/dashboard/ui.ts"            }
+    { "src": "/dashboard",                      "dest": "/public/dashboard.html"          }
   ]
 }
