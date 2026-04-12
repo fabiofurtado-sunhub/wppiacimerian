@@ -4,17 +4,26 @@ import { getSession, saveSession, clearSession } from '../lib/session';
 import { sendMessage } from '../lib/zapi';
 import { saveLeadToSheets } from '../lib/sheets';
 
-const TRIGGER_MESSAGES = [
-  'olá! gostaria de fazer um orçamento dos equipamentos em estoque',
-  'quero fazer um orçamento com 10% de entrada e o restante em 48x',
-  'olá! gostaria de fazer um orçamento para o projeto layout cimerian',
-  'olá! gostaria de mais informações sobre os equipamentos cimerian',
-  'olá! gostaria de fazer um orçamento de equipamentos de cardio',
-];
 
 function isTrigger(text: string): boolean {
-  const normalized = text.toLowerCase().trim().replace(/[!?.]/g, '');
-  return TRIGGER_MESSAGES.some((t) => normalized.includes(t));
+  const normalized = text
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[!?.]/g, '')
+    .trim();
+  const triggers = [
+    'ola gostaria de fazer um orcamento dos equipamentos em estoque',
+    'quero fazer um orcamento com 10 de entrada e o restante em 48x',
+    'ola gostaria de fazer um orcamento para o projeto layout cimerian',
+    'ola gostaria de mais informacoes sobre os equipamentos cimerian',
+    'ola gostaria de fazer um orcamento de equipamentos de cardio',
+  ];
+  const resultado = triggers.some((t) => normalized.includes(t));
+  console.log('[isTrigger] normalized:', normalized);
+  console.log('[isTrigger] resultado:', resultado);
+  return resultado;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -52,7 +61,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Ignora se não tiver phone
     if (!phone) return res.status(200).json({ ok: true });
 
+    console.log('[webhook] phone:', phone);
+    console.log('[webhook] text:', text);
+
     const session = await getSession(phone);
+    console.log('[webhook] session.active:', session.active);
 
     // Sem sessão ativa: verifica gatilho
     if (!session.active) {
