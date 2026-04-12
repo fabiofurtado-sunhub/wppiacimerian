@@ -26,34 +26,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = req.body;
     console.log('[webhook] body recebido:', JSON.stringify(body));
 
-    // Compatibilidade com formato ZAPI
-    const phone: string =
-      body?.phone ||
-      body?.chatId?.replace('@c.us', '') ||
-      body?.from?.replace('@c.us', '') ||
-      body?.sender?.replace('@c.us', '') ||
-      body?.data?.phone ||
-      '';
-    const text: string =
-      body?.text?.message ||
-      body?.message?.text ||
-      body?.message ||
-      body?.body ||
-      body?.content ||
-      body?.data?.message ||
-      (typeof body?.text === 'string' ? body.text : '') ||
-      '';
+    // Ignora mensagens de grupo
+    if (body?.isGroup === true) return res.status(200).json({ ok: true });
+
+    // Ignora mensagens de status
+    if (body?.isStatusReply === true) return res.status(200).json({ ok: true });
+
+    // Ignora mensagens enviadas por mim (fromMe)
+    if (body?.fromMe === true) return res.status(200).json({ ok: true });
+
+    // Extração de campos — phone vem direto (grupos já ignorados acima)
+    const phone: string = body?.phone || '';
+    const text: string = body?.text?.message || '';
     const name: string =
       body?.senderName ||
       body?.pushName ||
       body?.notifyName ||
       '';
 
-    // Ignora se não tiver phone ou texto
-    if (!phone || !text) return res.status(200).json({ ok: true });
+    // Ignora mídias e mensagens sem texto puro
+    if (!text || body?.video || body?.image || body?.audio || body?.document) {
+      return res.status(200).json({ ok: true });
+    }
 
-    // Ignora mensagens enviadas por mim (fromMe)
-    if (body?.fromMe === true) return res.status(200).json({ ok: true });
+    // Ignora se não tiver phone
+    if (!phone) return res.status(200).json({ ok: true });
 
     const session = await getSession(phone);
 
