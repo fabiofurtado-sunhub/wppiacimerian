@@ -33,7 +33,7 @@ export async function saveLeadToSheets(lead: Record<string, string>): Promise<vo
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Sheet1!A:M',
+      range: 'Leads_Ads!A:M',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [row] },
     });

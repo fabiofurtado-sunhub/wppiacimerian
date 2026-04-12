@@ -62,6 +62,7 @@ async function extractLeadData(
       model: 'claude-sonnet-4-20250514',
       max_tokens: 512,
       system: `Você é um extrator de dados. Analise a conversa e retorne SOMENTE um JSON válido, sem texto adicional, sem markdown, sem backticks.
+O campo faturamento_mensal deve ser sempre um número inteiro em reais, sem símbolos. Exemplos de conversão: "cinquenta mil" → 50000, "R$50k" → 50000, "50 mil reais" → 50000, "250.000" → 250000, "não informado" → 0.
 Campos obrigatórios:
 {
   "nome": "",
@@ -70,7 +71,7 @@ Campos obrigatórios:
   "perfil": "pessoal|academia",
   "nome_academia": "",
   "proprietario": "sim|não|não informado",
-  "faturamento_mensal": "",
+  "faturamento_mensal": 0,
   "interesse_equipamento": "",
   "quer_catalogo": "sim|não",
   "agendamento": "",
