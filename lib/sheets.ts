@@ -12,6 +12,7 @@ async function getSheets() {
 }
 
 export async function saveLeadToSheets(lead: Record<string, string>): Promise<void> {
+  console.log('[sheets] tentando salvar lead:', JSON.stringify(lead));
   try {
     const sheets = await getSheets();
     const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
@@ -37,6 +38,6 @@ export async function saveLeadToSheets(lead: Record<string, string>): Promise<vo
       requestBody: { values: [row] },
     });
   } catch (err) {
-    console.error('[sheets] erro ao salvar lead:', err);
+    console.error('[sheets] erro ao salvar:', err);
   }
 }

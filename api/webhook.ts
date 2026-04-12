@@ -82,7 +82,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await saveSession(phone, sessionUpdated);
     await sendMessage(phone, reply);
 
+    console.log('[webhook] leadData extraído:', JSON.stringify(leadData));
     if (leadData) {
+      console.log('[webhook] chamando saveLeadToSheets...');
       await saveLeadToSheets({ ...leadData, phone });
       await clearSession(phone);
     }

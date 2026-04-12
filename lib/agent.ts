@@ -35,6 +35,9 @@ export async function handleMessage(
     reply.toLowerCase().includes('até logo') ||
     updatedHistory.length > 40;
 
+  console.log('[agent] reply preview:', reply.substring(0, 100));
+  console.log('[agent] isEnded:', isEnded);
+
   let leadData: Record<string, string> | null = null;
   if (isEnded) {
     leadData = await extractLeadData(updatedHistory);
