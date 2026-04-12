@@ -54,6 +54,35 @@ export async function handleMessage(
   };
 }
 
+export async function extractPartialData(
+  history: { role: string; content: string }[]
+): Promise<Record<string, string> | null> {
+  if (history.length < 3) return null;
+  try {
+    const extraction = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 256,
+      system: `Você é um extrator de dados parciais. Analise a conversa e retorne SOMENTE um JSON válido com os campos coletados até agora. Campos ainda desconhecidos deixe como string vazia. Se nenhum dado relevante foi coletado além da saudação, retorne exatamente: null
+Formato:
+{"nome":"","cidade":"","estado":"","perfil":"","nome_academia":"","proprietario":"","faturamento_mensal":"","interesse_equipamento":""}`,
+      messages: [{ role: 'user', content: `Conversa: ${JSON.stringify(history)}` }],
+    });
+
+    const raw = extraction.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+      .trim();
+
+    if (raw === 'null') return null;
+    const data = JSON.parse(raw);
+    if (!data.nome) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 async function extractLeadData(
   history: { role: string; content: string }[]
 ): Promise<Record<string, string> | null> {

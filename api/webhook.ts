@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleMessage } from '../lib/agent';
+import { handleMessage, extractPartialData } from '../lib/agent';
 import { getSession, saveSession, clearSession } from '../lib/session';
 import { sendMessage } from '../lib/zapi';
-import { saveLeadToSheets } from '../lib/sheets';
+import { upsertLead } from '../lib/sheets';
 
 const TRIGGERS = [
   { keywords: ['orcamento dos equipamentos em estoque'], tag: 'Padrao' },
@@ -80,6 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('[isTrigger] normalized:', normalize(text));
       console.log('[isTrigger] resultado:', triggered);
       if (!triggered) return res.status(200).json({ ok: true });
+
       // Inicia sessão
       session.active = true;
       session.leadName = name;
@@ -90,6 +91,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       session.utm_medium = '';
       session.utm_campaign = '';
       session.utm_content = '';
+
+      // MOMENTO 1 — salva lead ao entrar no funil
+      await upsertLead({
+        phone,
+        nome: name,
+        tag: session.tag,
+        status: 'iniciado',
+      });
     }
 
     const { reply, sessionUpdated, leadData } = await handleMessage(text, session);
@@ -98,9 +107,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await sendMessage(phone, reply);
 
     console.log('[webhook] leadData extraído:', JSON.stringify(leadData));
+
     if (leadData) {
-      console.log('[webhook] chamando saveLeadToSheets...');
-      await saveLeadToSheets({
+      // MOMENTO 3 — encerramento: salva dados completos
+      console.log('[webhook] chamando upsertLead (encerramento)...');
+      await upsertLead({
         ...leadData,
         phone,
         tag: session.tag || '',
@@ -110,6 +121,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         utm_content: session.utm_content || '',
       });
       await clearSession(phone);
+    } else {
+      // MOMENTO 2 — mid-conversation: salva dados parciais se nome já foi coletado
+      const partialData = await extractPartialData(sessionUpdated.history);
+      if (partialData) {
+        console.log('[webhook] chamando upsertLead (parcial)...');
+        await upsertLead({
+          ...partialData,
+          phone,
+          tag: session.tag || '',
+          utm_source: session.utm_source || '',
+          utm_medium: session.utm_medium || '',
+          utm_campaign: session.utm_campaign || '',
+          utm_content: session.utm_content || '',
+          status: 'em_andamento',
+        });
+      }
     }
 
     return res.status(200).json({ ok: true });
