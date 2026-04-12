@@ -5,6 +5,11 @@ export interface Session {
   leadName: string;
   phone: string;
   history: { role: 'user' | 'assistant'; content: string }[];
+  tag: string;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
 }
 
 const redis = new Redis({
@@ -16,7 +21,7 @@ const SESSION_TTL = 60 * 60 * 2; // 2 horas
 
 export async function getSession(phone: string): Promise<Session> {
   const data = await redis.get<Session>(`session:${phone}`);
-  return data ?? { active: false, leadName: '', phone, history: [] };
+  return data ?? { active: false, leadName: '', phone, history: [], tag: '', utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '' };
 }
 
 export async function saveSession(phone: string, session: Session): Promise<void> {

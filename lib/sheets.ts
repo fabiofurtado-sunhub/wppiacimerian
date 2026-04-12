@@ -30,10 +30,15 @@ export async function saveLeadToSheets(lead: Record<string, string>): Promise<vo
       lead.quer_catalogo || '',
       lead.agendamento || '',
       lead.status || '',
+      lead.tag || '',
+      lead.utm_source || '',
+      lead.utm_medium || '',
+      lead.utm_campaign || '',
+      lead.utm_content || '',
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Leads_Ads!A:M',
+      range: 'Leads_Ads!A:R',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [row] },
     });

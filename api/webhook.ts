@@ -4,26 +4,33 @@ import { getSession, saveSession, clearSession } from '../lib/session';
 import { sendMessage } from '../lib/zapi';
 import { saveLeadToSheets } from '../lib/sheets';
 
+const TRIGGERS = [
+  { keywords: ['orcamento dos equipamentos em estoque'], tag: 'Padrao' },
+  { keywords: ['10% de entrada', '10 de entrada', 'restante em 48x', '48x'], tag: '10%+48x' },
+  { keywords: ['projeto layout cimerian', 'orcamento para o projeto layout'], tag: 'Layout' },
+  { keywords: ['mais informacoes sobre os equipamentos cimerian'], tag: 'Padrao' },
+  { keywords: ['orcamento de equipamentos de cardio', 'equipamentos de cardio'], tag: 'Cardio' },
+];
 
-function isTrigger(text: string): boolean {
-  const normalized = text
+function normalize(text: string): string {
+  return text
     .toLowerCase()
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[!?.]/g, '')
     .trim();
-  const triggers = [
-    'ola gostaria de fazer um orcamento dos equipamentos em estoque',
-    'quero fazer um orcamento com 10 de entrada e o restante em 48x',
-    'ola gostaria de fazer um orcamento para o projeto layout cimerian',
-    'ola gostaria de mais informacoes sobre os equipamentos cimerian',
-    'ola gostaria de fazer um orcamento de equipamentos de cardio',
-  ];
-  const resultado = triggers.some((t) => normalized.includes(t));
-  console.log('[isTrigger] normalized:', normalized);
-  console.log('[isTrigger] resultado:', resultado);
-  return resultado;
+}
+
+function isTrigger(text: string): boolean {
+  const n = normalize(text);
+  return TRIGGERS.some((t) => t.keywords.some((k) => n.includes(normalize(k))));
+}
+
+function getTriggerTag(text: string): string {
+  const n = normalize(text);
+  const match = TRIGGERS.find((t) => t.keywords.some((k) => n.includes(normalize(k))));
+  return match?.tag || 'Padrao';
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -69,12 +76,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Sem sessão ativa: verifica gatilho
     if (!session.active) {
-      if (!isTrigger(text)) return res.status(200).json({ ok: true });
+      const triggered = isTrigger(text);
+      console.log('[isTrigger] normalized:', normalize(text));
+      console.log('[isTrigger] resultado:', triggered);
+      if (!triggered) return res.status(200).json({ ok: true });
       // Inicia sessão
       session.active = true;
       session.leadName = name;
       session.phone = phone;
       session.history = [];
+      session.tag = getTriggerTag(text);
+      session.utm_source = '';
+      session.utm_medium = '';
+      session.utm_campaign = '';
+      session.utm_content = '';
     }
 
     const { reply, sessionUpdated, leadData } = await handleMessage(text, session);
@@ -85,7 +100,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('[webhook] leadData extraído:', JSON.stringify(leadData));
     if (leadData) {
       console.log('[webhook] chamando saveLeadToSheets...');
-      await saveLeadToSheets({ ...leadData, phone });
+      await saveLeadToSheets({
+        ...leadData,
+        phone,
+        tag: session.tag || '',
+        utm_source: session.utm_source || '',
+        utm_medium: session.utm_medium || '',
+        utm_campaign: session.utm_campaign || '',
+        utm_content: session.utm_content || '',
+      });
       await clearSession(phone);
     }
 
