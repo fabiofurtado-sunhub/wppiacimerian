@@ -120,8 +120,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('[webhook] leadData extraído:', JSON.stringify(leadData));
 
     if (leadData) {
-      // MOMENTO 3 — encerramento: salva dados completos
-      console.log('[sheets] MOMENTO 3 - leadData final:', JSON.stringify(leadData));
+      // ENCERRAMENTO — salva dados completos extraídos
+      console.log('[sheets] ENCERRAMENTO - leadData final:', JSON.stringify(leadData));
       await upsertLead({
         ...leadData,
         phone,
@@ -133,13 +133,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         utm_content: session.utm_content || '',
       });
       await clearSession(phone);
-    } else if (sessionUpdated.history.length >= 6) {
-      // MOMENTO 2 — mid-conversation: só executa com 6+ mensagens e se nome já foi coletado
-      const partialData = await extractPartialData(sessionUpdated.history);
-      console.log('[sheets] MOMENTO 2 - partialData:', JSON.stringify(partialData));
-      if (partialData) {
+    } else {
+      // INCREMENTAL — salva após cada resposta do agente para não perder dados
+      const partialNow = await extractPartialData(sessionUpdated.history);
+      console.log('[sheets] INCREMENTAL - partialNow:', JSON.stringify(partialNow));
+      if (partialNow) {
         await upsertLead({
-          ...partialData,
+          ...partialNow,
           phone,
           nomeWhatsapp: session.nomeWhatsapp || '',
           tag: session.tag || '',
@@ -147,7 +147,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           utm_medium: session.utm_medium || '',
           utm_campaign: session.utm_campaign || '',
           utm_content: session.utm_content || '',
-          status: 'em_andamento',
+          status: sessionUpdated.active ? 'em_andamento' : (partialNow.status || 'incompleto'),
+          timestamp: session.timestamp || new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
         });
       }
     }
