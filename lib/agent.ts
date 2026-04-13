@@ -40,9 +40,11 @@ ${isWeekend ? 'ATENÇÃO: Hoje é fim de semana. NÃO ofereça contato imediato.
 
   const updatedHistory = [...history, { role: 'assistant' as const, content: reply }];
 
+  const replyLower = reply.toLowerCase();
   const isEnded =
-    reply.toLowerCase().includes('até lá') ||
-    reply.toLowerCase().includes('até logo') ||
+    replyLower.includes('até lá') ||
+    replyLower.includes('até logo') ||
+    replyLower.includes('obrigado pelo interesse na cimerian') ||
     updatedHistory.length > 40;
 
   console.log('[agent] reply preview:', reply.substring(0, 100));
@@ -133,7 +135,12 @@ Campos obrigatórios:
       .map((b) => b.text)
       .join('');
 
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    // Garante que faturamento_mensal seja string para não ser perdido como falsy (0)
+    if (data !== null && typeof data.faturamento_mensal === 'number') {
+      data.faturamento_mensal = String(data.faturamento_mensal);
+    }
+    return data;
   } catch {
     return null;
   }
