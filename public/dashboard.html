@@ -3,517 +3,643 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cimerian — Painel Comercial</title>
+<title>Cimerian · Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
 <style>
-/* ---- RESET ---- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
-body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; background: #111b21; color: #e9edef; }
-button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
-input { font: inherit; }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
-
-/* ---- LOGIN ---- */
-#login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; }
-.login-box { background: #202c33; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; }
-.login-box h1 { font-size: 22px; font-weight: 700; color: #e9edef; margin-bottom: 4px; }
-.login-box h1 span { color: #00a884; }
-.login-box p { font-size: 13px; color: #8696a0; margin-bottom: 28px; }
-.login-box label { display: block; font-size: 12px; color: #8696a0; margin-bottom: 6px; }
-.login-box input { width: 100%; background: #2a3942; border: 1px solid #374045; border-radius: 8px; padding: 10px 12px; color: #e9edef; outline: none; margin-bottom: 14px; }
-.login-box input:focus { border-color: #00a884; }
-.login-box input::placeholder { color: #8696a0; }
-.login-box button { width: 100%; background: #00a884; color: #fff; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600; }
-.login-box button:hover { background: #017d62; }
-.login-box button:disabled { opacity: 0.6; cursor: not-allowed; }
-#login-error { color: #f87171; font-size: 13px; margin-top: 10px; display: none; }
-
-/* ---- APP SHELL ---- */
-#app-screen { height: 100vh; overflow: hidden; }
-.app-layout { display: flex; height: 100%; }
-
-/* ---- SIDEBAR ---- */
-.sidebar { width: 320px; flex-shrink: 0; background: #202c33; display: flex; flex-direction: column; border-right: 1px solid #374045; }
-.sidebar-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #374045; flex-shrink: 0; }
-.brand { font-size: 17px; font-weight: 700; color: #e9edef; }
-.brand span { color: #00a884; }
-.sidebar-user { display: flex; align-items: center; gap: 10px; }
-.sidebar-user span { font-size: 12px; color: #8696a0; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.logout-btn { font-size: 12px; color: #8696a0; padding: 4px 10px; border: 1px solid #374045; border-radius: 6px; }
-.logout-btn:hover { border-color: #00a884; color: #00a884; }
-.sidebar-search-wrap { padding: 8px 12px; flex-shrink: 0; border-bottom: 1px solid #1a2228; }
-.sidebar-search { width: 100%; background: #2a3942; border: none; border-radius: 8px; padding: 8px 12px; color: #e9edef; outline: none; font-size: 13px; }
-.sidebar-search::placeholder { color: #8696a0; }
-
-/* ---- CONVERSATIONS IN SIDEBAR ---- */
-/* No tab-panel class — always visible, not affected by switchTab() */
-#tab-conversations { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-.conv-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; flex-shrink: 0; }
-.conv-header span { font-size: 11px; font-weight: 600; color: #8696a0; text-transform: uppercase; letter-spacing: 0.05em; }
-.btn-icon { font-size: 16px; color: #8696a0; padding: 2px 6px; border-radius: 4px; }
-.btn-icon:hover { color: #00a884; background: #2a3942; }
-.conv-scroll { flex: 1; overflow-y: auto; min-height: 0; }
-
-/* Conversations table — rendered as list via CSS */
-.conv-scroll table { display: block; width: 100%; }
-.conv-scroll thead { display: none; }
-.conv-scroll tbody { display: block; }
-
-/* Each conversation row as WhatsApp-style list item */
-.conv-scroll tbody tr {
-  display: grid;
-  grid-template-columns: 44px 1fr auto;
-  grid-template-rows: 20px 16px;
-  column-gap: 10px;
-  row-gap: 3px;
-  padding: 10px 14px 10px 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #1a2228;
-  border-left: 3px solid transparent;
-  align-items: center;
+:root {
+  --primary:#dc2626;--primary-light:rgba(220,38,38,0.1);--primary-hover:#b91c1c;
+  --sidebar-bg:#1a1c23;--sidebar-width:260px;--header-height:64px;
+  --card-bg:#22242c;--card-hover:#2a2d38;--body-bg:#16181f;
+  --border:rgba(255,255,255,0.07);--text:#e2e8f0;--text-muted:#6b7280;--text-dim:#9ca3af;
+  --green:#10b981;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;
+  --radius:12px;--shadow:0 4px 24px rgba(0,0,0,0.3);
+  --font-base:'Nunito Sans',sans-serif;--font-title:'Poppins',sans-serif;
 }
-.conv-scroll tbody tr:hover { background: #2a3942; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--body-bg);font-family:var(--font-base);color:var(--text);height:100vh;overflow:hidden}
+input,select,button{font-family:var(--font-base)}
 
-/* Avatar circle via ::before */
-.conv-scroll tbody tr::before {
-  content: '';
-  grid-column: 1; grid-row: 1 / 3;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  align-self: center;
-  background: #00a884;
-}
-.conv-scroll tbody tr:nth-child(7n+2)::before { background: #f59e0b; }
-.conv-scroll tbody tr:nth-child(7n+3)::before { background: #3b82f6; }
-.conv-scroll tbody tr:nth-child(7n+4)::before { background: #8b5cf6; }
-.conv-scroll tbody tr:nth-child(7n+5)::before { background: #ef4444; }
-.conv-scroll tbody tr:nth-child(7n+6)::before { background: #06b6d4; }
-.conv-scroll tbody tr:nth-child(7n)::before   { background: #f97316; }
+/* LOGIN */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--body-bg);background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:24px 24px;z-index:100}
+.login-card{width:420px;background:var(--card-bg);border-radius:20px;padding:48px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .logo-c{font-family:var(--font-title);font-size:42px;font-weight:700;color:var(--primary);line-height:1}
+.login-logo .logo-rest{font-family:var(--font-title);font-size:42px;font-weight:700;color:var(--text);line-height:1}
+.login-logo p{color:var(--text-muted);font-size:13px;margin-top:8px;text-transform:uppercase;letter-spacing:0.1em;font-weight:600}
+.login-card input{width:100%;background:var(--body-bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-size:15px;margin-bottom:12px;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.login-card input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(220,38,38,0.1)}
+.login-card input::placeholder{color:var(--text-muted)}
+.btn-primary{width:100%;height:48px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font-title);transition:all 0.2s;margin-top:4px}
+.btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px)}
+#login-error{color:#f87171;font-size:13px;margin-top:8px;display:none;text-align:center}
 
-/* td: phone → hidden */
-.conv-scroll td:nth-child(1) { display: none; }
-/* td: name → row 1 col 2 */
-.conv-scroll td:nth-child(2) { grid-column: 2; grid-row: 1; font-size: 14px; font-weight: 500; color: #e9edef; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: end; }
-/* td: tag → row 1 col 3 */
-.conv-scroll td:nth-child(3) { grid-column: 3; grid-row: 1; align-self: end; }
-/* td: status → row 2 col 3 */
-.conv-scroll td:nth-child(4) { grid-column: 3; grid-row: 2; align-self: start; }
-/* td: messageCount → hidden */
-.conv-scroll td:nth-child(5) { display: none; }
-/* td: lastMessage → row 2 col 2 */
-.conv-scroll td:nth-child(6) { grid-column: 2; grid-row: 2; font-size: 12px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: start; }
+/* APP */
+#app{display:none;height:100vh;overflow:hidden}
+.app-layout{display:flex;height:100vh}
 
-/* Loading / empty row overrides grid */
-.conv-scroll tbody tr:only-child { display: block !important; }
+/* SIDEBAR */
+aside{width:var(--sidebar-width);min-width:var(--sidebar-width);background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo span{font-family:var(--font-title);font-size:22px;font-weight:700}
+.sidebar-logo .c{color:var(--primary)}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-muted);transition:all 0.15s;margin-bottom:2px;border:none;background:transparent;width:100%;text-align:left}
+.nav-item:hover{background:var(--card-hover);color:var(--text)}
+.nav-item.active{background:var(--primary-light);color:var(--primary)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sidebar-avatar{width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.sidebar-user{flex:1;overflow:hidden}
+.sidebar-user-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-role{font-size:11px;color:var(--text-muted)}
+.btn-logout{background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:4px;border-radius:6px;display:flex;align-items:center;transition:color 0.15s}
+.btn-logout:hover{color:var(--primary)}
 
-/* ---- BADGES ---- */
-.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-.badge-active  { background: rgba(245,158,11,0.15); color: #f59e0b; }   /* em andamento */
-.badge-closed  { background: rgba(134,150,160,0.15); color: #8696a0; }  /* encerrado */
-.badge-tag     { background: rgba(59,130,246,0.15);  color: #5b8dee; }  /* tag */
+/* MAIN */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.main-header{height:var(--header-height);background:var(--card-bg);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.main-header h1{font-family:var(--font-title);font-size:18px;font-weight:600;color:var(--text)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-date{font-size:13px;color:var(--text-muted)}
+.btn-refresh{background:var(--card-hover);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;padding:8px;border-radius:8px;display:flex;align-items:center;transition:all 0.15s}
+.btn-refresh:hover{color:var(--text);border-color:var(--text-muted)}
+.main-content{flex:1;overflow-y:auto}
 
-/* ---- MAIN AREA ---- */
-.main-area { flex: 1; background: #0b141a; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+/* VIEWS */
+.view{display:none;padding:32px}
+.view.active{display:block}
+#view-conversations.active{display:flex;padding:0}
+#view-conversations{flex:1;overflow:hidden}
 
-/* Tabs — Métricas | [hidden Conversas] | Leads */
-.main-tabs { background: #202c33; display: flex; border-bottom: 1px solid #374045; flex-shrink: 0; }
-.tab-btn { padding: 14px 24px; font-size: 14px; color: #8696a0; border-bottom: 2px solid transparent; }
-.tab-btn.active { color: #00a884; border-bottom-color: #00a884; }
-.tab-btn:hover:not(.active) { color: #e9edef; background: #2a3942; }
+/* CARDS */
+.card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);padding:24px}
+.card-title{font-family:var(--font-title);font-size:15px;font-weight:600;color:var(--text);margin-bottom:16px}
+.card-subtitle{font-size:13px;color:var(--text-muted);margin-top:4px}
 
-/* Tab panels */
-.tab-panel { display: none; flex: 1; overflow-y: auto; padding: 24px; flex-direction: column; }
-.tab-panel.active { display: flex; }
+/* METRIC CARDS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:28px}
+.metric-card{background:var(--card-bg);border-radius:var(--radius);padding:24px;border:1px solid var(--border);position:relative;overflow:hidden}
+.metric-card:nth-child(1){border-left:3px solid var(--primary)}
+.metric-card:nth-child(2){border-left:3px solid var(--blue)}
+.metric-card:nth-child(3){border-left:3px solid var(--green)}
+.metric-card:nth-child(4){border-left:3px solid var(--yellow)}
+.metric-value{font-family:var(--font-title);font-size:32px;font-weight:800;line-height:1}
+.metric-label{font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-top:8px}
+.metric-icon{position:absolute;right:20px;top:50%;transform:translateY(-50%);opacity:0.08}
+.metric-icon svg{width:48px;height:48px}
 
-/* Panel header */
-.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-shrink: 0; }
-.panel-header h2 { font-size: 16px; font-weight: 600; color: #e9edef; }
-.refresh-btn { font-size: 12px; color: #8696a0; padding: 5px 12px; border: 1px solid #374045; border-radius: 6px; }
-.refresh-btn:hover { border-color: #00a884; color: #00a884; }
+/* FUNIL */
+.funnel-wrap{margin-bottom:28px}
+.funnel-stages{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:16px}
+.funnel-stage{height:52px;border-radius:6px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:white;font-weight:700;font-size:14px}
+.funnel-stage-label{font-size:13px;font-weight:700}
+.funnel-stage-num{font-size:20px;font-weight:800;font-family:var(--font-title)}
+.funnel-stage-pct{font-size:12px;opacity:0.85}
 
-/* ---- METRICS ---- */
-.metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.metric-card { background: #202c33; border-radius: 10px; padding: 20px; }
-.metric-card .label { font-size: 12px; color: #8696a0; margin-bottom: 8px; }
-.metric-card .value { font-size: 28px; font-weight: 700; color: #e9edef; }
-.metric-card .value.accent { color: #00a884; }
-.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag-item { background: #202c33; border: 1px solid #374045; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #8696a0; }
-.tag-item span { color: #00a884; font-weight: 700; margin-left: 6px; }
+/* GRID 3 */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:28px}
 
-/* ---- LEADS TABLE ---- */
-.leads-filter { margin-bottom: 14px; flex-shrink: 0; }
-.leads-filter input { background: #202c33; border: 1px solid #374045; border-radius: 8px; padding: 8px 12px; color: #e9edef; font-size: 13px; outline: none; width: 280px; }
-.leads-filter input:focus { border-color: #00a884; }
-.leads-filter input::placeholder { color: #8696a0; }
-.table-wrap { background: #202c33; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
-table { width: 100%; border-collapse: collapse; }
-thead th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: #8696a0; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #374045; }
-tbody tr { border-bottom: 1px solid #1a2228; }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #1a2a33; }
-tbody td { padding: 10px 14px; color: #e9edef; font-size: 13px; }
-tbody td.phone { font-family: monospace; font-size: 12px; color: #8696a0; }
+/* BARRAS */
+.bar-item{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:13px;color:var(--text);min-width:60px;font-weight:600}
+.bar-track{flex:1;height:8px;background:var(--card-hover);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.bar-num{font-size:13px;color:var(--text-muted);min-width:32px;text-align:right;font-weight:700}
 
-/* ---- LOADING / EMPTY ---- */
-.loading { text-align: center; color: #8696a0; padding: 32px 16px; font-size: 13px; }
-.empty   { text-align: center; color: #8696a0; padding: 32px 16px; font-size: 13px; }
+/* UF */
+.uf-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.uf-badge{width:32px;height:32px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
 
-/* ---- MODAL (chat history) ---- */
-#modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
-#modal-overlay.open { display: flex; }
-.modal { background: #0b141a; border-radius: 12px; width: 100%; max-width: 680px; height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
-.modal-header { background: #202c33; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid #374045; }
-.modal-header h3 { font-size: 15px; font-weight: 600; color: #e9edef; }
-.modal-close { font-size: 22px; color: #8696a0; padding: 0 4px; line-height: 1; }
-.modal-close:hover { color: #e9edef; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; background: #0b141a; }
-.msg { padding: 8px 12px; border-radius: 8px; max-width: 65%; font-size: 13px; line-height: 1.5; word-break: break-word; }
-.msg.user      { background: #202c33; color: #e9edef; align-self: flex-start; border-radius: 0 8px 8px 8px; }
-.msg.assistant { background: #005c4b; color: #e9edef; align-self: flex-end;   border-radius: 8px 0 8px 8px; }
-.msg .role-label { font-size: 10px; color: #8696a0; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
+/* COHORT */
+.cohort-item{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 12px;border-radius:8px;background:var(--body-bg)}
+.cohort-letter{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:16px;font-weight:800;flex-shrink:0}
+.cohort-info{flex:1}
+.cohort-range{font-size:11px;color:var(--text-muted)}
+.cohort-count{font-size:15px;font-weight:800;font-family:var(--font-title)}
+.priority-badge{font-size:10px;font-weight:700;background:rgba(220,38,38,0.15);color:var(--primary);padding:2px 6px;border-radius:4px}
+
+/* PERFIL */
+.perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.perfil-box{padding:16px;border-radius:10px;text-align:center}
+.perfil-box .pct{font-family:var(--font-title);font-size:28px;font-weight:800}
+.perfil-box .lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px}
+.perfil-box .num{font-size:13px;color:var(--text-muted);margin-top:2px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-agendado{background:rgba(16,185,129,0.15);color:#10b981}
+.badge-em_andamento{background:rgba(245,158,11,0.15);color:#f59e0b}
+.badge-iniciado{background:rgba(107,114,128,0.15);color:#9ca3af}
+.badge-catalogo_enviado{background:rgba(59,130,246,0.15);color:#3b82f6}
+.badge-desistiu{background:rgba(239,68,68,0.15);color:#ef4444}
+.badge-Padrao,.badge-padrao{background:rgba(59,130,246,0.15);color:#3b82f6}
+.badge-Cardio,.badge-cardio{background:rgba(16,185,129,0.15);color:#10b981}
+.badge-Layout,.badge-layout{background:rgba(139,92,246,0.15);color:#8b5cf6}
+.badge-48x{background:rgba(245,158,11,0.15);color:#f59e0b}
+.badge-academia{background:rgba(16,185,129,0.1);color:#10b981}
+.badge-pessoal{background:rgba(59,130,246,0.1);color:#3b82f6}
+
+/* CONVERSAS */
+.conv-layout{display:flex;height:100%;overflow:hidden}
+.conv-list{width:300px;min-width:300px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.conv-search{padding:12px 16px;border-bottom:1px solid var(--border)}
+.conv-search input{width:100%;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none}
+.conv-search input:focus{border-color:var(--primary)}
+.conv-items{flex:1;overflow-y:auto}
+.conv-item{display:flex;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);gap:12px;transition:background 0.15s}
+.conv-item:hover{background:var(--card-hover)}
+.conv-item.active{background:var(--primary-light);border-left:3px solid var(--primary)}
+.conv-avatar{width:44px;height:44px;border-radius:50%;background:var(--primary);color:white;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.conv-info{flex:1;overflow:hidden;min-width:0}
+.conv-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.conv-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-time{font-size:11px;color:var(--text-muted);flex-shrink:0;margin-left:8px}
+.conv-preview{font-size:13px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.conv-badges{display:flex;gap:4px;flex-wrap:wrap}
+
+/* CHAT */
+.chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat-header{padding:16px 24px;background:var(--card-bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary);color:white;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-name{font-family:var(--font-title);font-size:15px;font-weight:600}
+.chat-phone{font-size:13px;color:var(--text-muted)}
+.chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;background:var(--body-bg)}
+.msg-wrap{display:flex;flex-direction:column;max-width:65%}
+.msg-wrap.user{align-self:flex-start}
+.msg-wrap.assistant{align-self:flex-end;align-items:flex-end}
+.msg-sender{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:4px}
+.msg-bubble{padding:12px 16px;border-radius:4px 16px 16px 16px;font-size:14px;line-height:1.5}
+.msg-wrap.user .msg-bubble{background:var(--card-bg);border:1px solid var(--border);border-radius:4px 16px 16px 16px}
+.msg-wrap.assistant .msg-bubble{background:var(--primary-light);border:1px solid rgba(220,38,38,0.2);border-radius:16px 4px 16px 16px}
+.msg-time{font-size:11px;color:var(--text-muted);margin-top:6px}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:12px}
+.chat-empty svg{width:48px;height:48px;opacity:0.3}
+.lead-data-card{margin:24px;background:var(--card-bg);border-radius:var(--radius);padding:24px;border:1px solid var(--border)}
+.lead-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.lead-data-item label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)}
+.lead-data-item p{font-size:14px;color:var(--text);margin-top:2px;font-weight:600}
+.no-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:12px;background:var(--body-bg)}
+.no-conv svg{width:64px;height:64px;opacity:0.15}
+.no-conv p{font-size:15px}
+
+/* LEADS */
+.leads-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.leads-filters{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.leads-filters select,.leads-filters input{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;cursor:pointer;outline:none}
+.leads-filters input{flex:1;min-width:200px}
+.leads-filters select:focus,.leads-filters input:focus{border-color:var(--primary)}
+.btn-csv{background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 20px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.15s}
+.btn-csv:hover{background:var(--primary-hover)}
+.table-wrap{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:900px}
+thead tr{background:var(--card-hover)}
+th{padding:14px 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;text-align:left;white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+tbody tr:hover{background:rgba(255,255,255,0.02)}
+tbody tr:last-child td{border-bottom:none}
+.empty-state{text-align:center;padding:48px;color:var(--text-muted)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
-    <h1>Cimerian <span>·</span></h1>
-    <p>Painel Comercial — acesso restrito</p>
-    <label for="email">E-mail</label>
-    <input type="email" id="email" placeholder="seu@email.com" autocomplete="username">
-    <label for="password">Senha</label>
-    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
-    <button id="login-btn" onclick="doLogin()">Entrar</button>
-    <div id="login-error">E-mail ou senha incorretos.</div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div><span class="logo-c">C</span><span class="logo-rest">imerian</span></div>
+      <p>Painel Comercial</p>
+    </div>
+    <input type="email" id="login-email" placeholder="E-mail" autocomplete="email">
+    <input type="password" id="login-password" placeholder="Senha" autocomplete="current-password">
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    <div id="login-error">E-mail ou senha incorretos</div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app-screen">
-  <div class="app-layout">
+<div id="app">
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="sidebar-logo"><span><span class="c">C</span>imerian</span></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="switchTab('metrics')" id="nav-metrics">
+        <i data-feather="bar-chart-2"></i> Métricas
+      </button>
+      <button class="nav-item" onclick="switchTab('conversations')" id="nav-conversations">
+        <i data-feather="message-circle"></i> Conversas
+      </button>
+      <button class="nav-item" onclick="switchTab('leads')" id="nav-leads">
+        <i data-feather="users"></i> Leads
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-avatar" id="sidebar-avatar">F</div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sidebar-name">Usuário</div>
+        <div class="sidebar-user-role">Comercial</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Sair"><i data-feather="log-out"></i></button>
+    </div>
+  </aside>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-top">
-        <div class="brand">Cimerian <span>·</span></div>
-        <div class="sidebar-user">
-          <span id="user-name"></span>
-          <button class="logout-btn" onclick="doLogout()">Sair</button>
-        </div>
+  <!-- MAIN -->
+  <main>
+    <div class="main-header">
+      <h1 id="main-title">Métricas</h1>
+      <div class="header-right">
+        <span class="header-date" id="header-date"></span>
+        <button class="btn-refresh" onclick="refresh()" title="Atualizar"><i data-feather="refresh-cw"></i></button>
       </div>
-      <div class="sidebar-search-wrap">
-        <input type="search" class="sidebar-search" placeholder="🔍  Buscar conversa...">
-      </div>
-      <!-- NO tab-panel class — stays visible regardless of active tab -->
-      <div id="tab-conversations">
-        <div class="conv-header">
-          <span>Conversas</span>
-          <button class="btn-icon" onclick="loadConversations()" title="Atualizar">↻</button>
-        </div>
-        <div class="conv-scroll">
-          <table>
-            <thead>
-              <tr><th>Telefone</th><th>Nome</th><th>Tag</th><th>Status</th><th>Msgs</th><th>Última mensagem</th></tr>
-            </thead>
-            <tbody id="conv-tbody">
-              <tr><td colspan="6" class="loading">Clique em ↻ para carregar</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </aside>
+    </div>
+    <div class="main-content">
 
-    <!-- MAIN AREA -->
-    <div class="main-area">
-      <!--
-        Tab-btn indexes must match JS: ['metrics', 'conversations', 'leads']
-        Index 1 (conversations) is hidden — sidebar handles conversations
-      -->
-      <div class="main-tabs">
-        <button class="tab-btn active" onclick="switchTab('metrics')">Métricas</button>
-        <button class="tab-btn" onclick="switchTab('conversations')" style="display:none" aria-hidden="true"></button>
-        <button class="tab-btn" onclick="switchTab('leads')">Leads</button>
+      <!-- MÉTRICAS -->
+      <div class="view active" id="view-metrics">
+        <div class="metrics-grid" id="metrics-cards">
+          <div class="metric-card"><div class="metric-value" style="color:var(--primary)" id="m-hoje">—</div><div class="metric-label">Leads hoje</div><div class="metric-icon"><i data-feather="trending-up"></i></div></div>
+          <div class="metric-card"><div class="metric-value" style="color:var(--blue)" id="m-total">—</div><div class="metric-label">Total de leads</div><div class="metric-icon"><i data-feather="users"></i></div></div>
+          <div class="metric-card"><div class="metric-value" style="color:var(--green)" id="m-agend">—</div><div class="metric-label">Agendados</div><div class="metric-icon"><i data-feather="calendar"></i></div></div>
+          <div class="metric-card"><div class="metric-value" style="color:var(--yellow)" id="m-taxa">—</div><div class="metric-label">Taxa de conversão</div><div class="metric-icon"><i data-feather="percent"></i></div></div>
+        </div>
+        <div class="card funnel-wrap">
+          <div class="card-title">Funil de Conversão</div>
+          <div class="funnel-stages" id="funnel-stages">
+            <div class="funnel-stage" style="background:linear-gradient(135deg,#3b82f6,#2563eb);width:100%"><span class="funnel-stage-label">Iniciados</span><span class="funnel-stage-num" id="f-init">—</span><span class="funnel-stage-pct" id="f-init-p">100%</span></div>
+            <div class="funnel-stage" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:75%"><span class="funnel-stage-label">Em andamento</span><span class="funnel-stage-num" id="f-prog">—</span><span class="funnel-stage-pct" id="f-prog-p">—</span></div>
+            <div class="funnel-stage" style="background:linear-gradient(135deg,#10b981,#059669);width:55%"><span class="funnel-stage-label">Agendados</span><span class="funnel-stage-num" id="f-agend">—</span><span class="funnel-stage-pct" id="f-agend-p">—</span></div>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><div class="card-title">Leads por Estado</div><div id="chart-uf"></div></div>
+          <div class="card"><div class="card-title">Por Tag</div><div id="chart-tag"></div></div>
+          <div class="card"><div class="card-title">Cohort por Faturamento</div><div id="chart-cohort"></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-title">Perfil do Lead</div><div class="perfil-grid" id="chart-perfil"></div></div>
+          <div class="card"><div class="card-title">Interesse em Equipamentos</div><div id="chart-interesse"></div></div>
+        </div>
       </div>
 
-      <!-- METRICS -->
-      <div id="tab-metrics" class="tab-panel active">
-        <div class="panel-header">
-          <h2>Visão Geral</h2>
-          <button class="refresh-btn" onclick="loadMetrics()">Atualizar</button>
-        </div>
-        <div class="metrics-grid" id="metrics-grid">
-          <div class="loading">Carregando...</div>
-        </div>
-        <div id="tag-breakdown-section" style="display:none;">
-          <h2 style="font-size:13px;color:#8696a0;margin-bottom:10px;">Distribuição por Tag</h2>
-          <div class="tag-list" id="tag-list"></div>
+      <!-- CONVERSAS -->
+      <div class="view" id="view-conversations">
+        <div class="conv-layout">
+          <div class="conv-list">
+            <div class="conv-search"><input type="text" id="conv-search" placeholder="Buscar conversa..." oninput="filterConversations()"></div>
+            <div class="conv-items" id="conv-items"><div class="empty-state">Carregando...</div></div>
+          </div>
+          <div class="chat-area" id="chat-area">
+            <div class="no-conv"><i data-feather="message-circle"></i><p>Selecione uma conversa</p></div>
+          </div>
         </div>
       </div>
 
       <!-- LEADS -->
-      <div id="tab-leads" class="tab-panel">
-        <div class="panel-header">
-          <h2>Leads</h2>
-          <button class="refresh-btn" onclick="loadLeads()">Atualizar</button>
+      <div class="view" id="view-leads">
+        <div class="leads-header">
+          <h2 style="font-family:var(--font-title);font-size:18px;font-weight:600">Leads</h2>
+          <button class="btn-csv" onclick="exportCSV()"><i data-feather="download"></i> Exportar CSV</button>
         </div>
-        <div class="leads-filter">
-          <input type="text" id="lead-search" placeholder="Buscar por nome ou telefone..." oninput="filterLeads()">
+        <div class="leads-filters">
+          <select id="f-status" onchange="renderLeadsTable()"><option value="">Todos os status</option><option value="iniciado">Iniciado</option><option value="em_andamento">Em andamento</option><option value="agendado">Agendado</option><option value="catalogo_enviado">Catálogo enviado</option><option value="desistiu">Desistiu</option><option value="incompleto">Incompleto</option></select>
+          <select id="f-tag" onchange="renderLeadsTable()"><option value="">Todas as tags</option><option value="Padrao">Padrão</option><option value="Cardio">Cardio</option><option value="Layout">Layout</option><option value="10%+48x">10%+48x</option></select>
+          <select id="f-perfil" onchange="renderLeadsTable()"><option value="">Todos os perfis</option><option value="academia">Academia</option><option value="pessoal">Pessoal</option></select>
+          <input type="text" id="f-busca" placeholder="Buscar por nome ou telefone..." oninput="renderLeadsTable()">
         </div>
         <div class="table-wrap">
           <table>
-            <thead>
-              <tr>
-                <th>Data</th><th>Telefone</th><th>Nome</th><th>Cidade/UF</th>
-                <th>Perfil</th><th>Tag</th><th>Status</th><th>Agendamento</th>
-              </tr>
-            </thead>
-            <tbody id="leads-tbody">
-              <tr><td colspan="8" class="loading">Carregando...</td></tr>
-            </tbody>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Cidade</th><th>UF</th><th>Perfil</th><th>Faturamento</th><th>Tag</th><th>Status</th><th>Agendamento</th></tr></thead>
+            <tbody id="leads-tbody"><tr><td colspan="9" class="empty-state">Carregando...</td></tr></tbody>
           </table>
         </div>
       </div>
-    </div><!-- .main-area -->
 
-  </div><!-- .app-layout -->
-</div><!-- #app-screen -->
-
-<!-- MODAL — chat history overlay -->
-<div id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal" id="modal-box">
-    <div class="modal-header">
-      <h3 id="modal-title">Conversa</h3>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="chat-messages" id="modal-chat"></div>
-  </div>
+    </div><!-- main-content -->
+  </main>
+</div>
 </div>
 
 <script>
-  const API = '';
-  let token = localStorage.getItem('cimerian_token') || '';
-  let userName = localStorage.getItem('cimerian_user') || '';
-  let allLeads = [];
-  let activeTab = 'metrics';
+const STATE = { user:null, token:null, conversations:[], leads:[], metrics:null, currentTab:'metrics', selectedPhone:null };
 
-  function init() {
-    if (token) {
-      showApp();
-    }
+// UTILS
+const $ = id => document.getElementById(id);
+const fmt = n => { n = Number(n)||0; return n >= 1000 ? 'R$ '+n.toLocaleString('pt-BR') : n > 0 ? 'R$ '+n.toLocaleString('pt-BR') : '—'; };
+const fmtPhone = p => { if(!p) return '—'; const d = String(p).replace(/\D/g,''); return d.length >= 11 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7,11)}` : p; };
+const timeAgo = ts => { if(!ts) return '—'; const diff = Date.now() - new Date(ts).getTime(); const m = Math.floor(diff/60000); if(m<1) return 'agora'; if(m<60) return `há ${m}min`; const h = Math.floor(m/60); if(h<24) return `há ${h}h`; return `há ${Math.floor(h/24)}d`; };
+const badge = (val, cls) => val ? `<span class="badge badge-${(cls||val).replace(/[^a-zA-Z0-9]/g,'-')}">${val}</span>` : '';
+const today = () => new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+const apiHeaders = () => ({ 'Authorization': `Bearer ${STATE.token}`, 'Content-Type': 'application/json' });
+
+// AUTH
+function init() {
+  const tok = localStorage.getItem('cim_token');
+  const usr = localStorage.getItem('cim_user');
+  if(tok && usr) { STATE.token = tok; STATE.user = JSON.parse(usr); showApp(); }
+  $('header-date') && ($('header-date').textContent = today());
+  feather.replace();
+}
+
+async function doLogin() {
+  const email = $('login-email').value.trim();
+  const pass = $('login-password').value;
+  $('login-error').style.display = 'none';
+  try {
+    const r = await fetch('/api/dashboard/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password: pass}) });
+    const d = await r.json();
+    if(!r.ok || !d.token) throw new Error(d.error||'Erro');
+    STATE.token = d.token; STATE.user = { name: d.name, role: d.role, email };
+    localStorage.setItem('cim_token', d.token);
+    localStorage.setItem('cim_user', JSON.stringify(STATE.user));
+    showApp();
+  } catch(e) { $('login-error').style.display='block'; }
+}
+
+function doLogout() {
+  localStorage.removeItem('cim_token'); localStorage.removeItem('cim_user');
+  STATE.token = null; STATE.user = null;
+  $('app').style.display = 'none'; $('login-screen').style.display = 'flex';
+}
+
+function showApp() {
+  $('login-screen').style.display = 'none';
+  $('app').style.display = 'block';
+  if(STATE.user) {
+    const ini = (STATE.user.name||'U')[0].toUpperCase();
+    $('sidebar-avatar').textContent = ini;
+    $('sidebar-name').textContent = STATE.user.name || STATE.user.email;
   }
+  $('header-date').textContent = today();
+  feather.replace();
+  loadConversations();
+  loadLeads();
+  switchTab('metrics');
+}
 
-  async function doLogin() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const btn = document.getElementById('login-btn');
-    const errEl = document.getElementById('login-error');
-    errEl.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Entrando...';
-    try {
-      const res = await fetch(API + '/api/dashboard/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro');
-      token = data.token;
-      userName = data.name || email;
-      localStorage.setItem('cimerian_token', token);
-      localStorage.setItem('cimerian_user', userName);
-      showApp();
-    } catch (e) {
-      errEl.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Entrar';
-    }
-  }
+// TABS
+function switchTab(tab) {
+  STATE.currentTab = tab;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); });
+  $('nav-'+tab).classList.add('active');
+  $('view-'+tab).classList.add('active');
+  const titles = { metrics:'Métricas', conversations:'Conversas', leads:'Leads' };
+  $('main-title').textContent = titles[tab]||tab;
+  feather.replace();
+  if(tab === 'metrics') renderMetrics();
+}
 
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
-  });
+function refresh() {
+  loadConversations();
+  loadLeads();
+  if(STATE.currentTab==='metrics') renderMetrics();
+  feather.replace();
+}
 
-  function doLogout() {
-    token = '';
-    userName = '';
-    localStorage.removeItem('cimerian_token');
-    localStorage.removeItem('cimerian_user');
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-  }
+// DATA
+async function loadConversations() {
+  try {
+    const r = await fetch('/api/dashboard/conversations', { headers: apiHeaders() });
+    if(!r.ok) return;
+    STATE.conversations = await r.json();
+    renderConversationList();
+  } catch(e) { console.error(e); }
+}
 
-  function showApp() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-    document.getElementById('user-name').textContent = userName;
-    loadMetrics();
-    loadConversations();
-  }
+async function loadLeads() {
+  try {
+    const r = await fetch('/api/dashboard/leads', { headers: apiHeaders() });
+    if(!r.ok) return;
+    STATE.leads = await r.json();
+    renderLeadsTable();
+    if(STATE.currentTab==='metrics') renderMetrics();
+  } catch(e) { console.error(e); }
+}
 
-  function switchTab(name) {
-    activeTab = name;
-    document.querySelectorAll('.tab-btn').forEach((b, i) => {
-      const tabs = ['metrics', 'conversations', 'leads'];
-      b.classList.toggle('active', tabs[i] === name);
-    });
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    if (name === 'metrics') loadMetrics();
-    if (name === 'conversations') loadConversations();
-    if (name === 'leads') loadLeads();
-  }
-
-  function authHeaders() {
-    return { 'Authorization': 'Bearer ' + token };
-  }
-
-  async function apiFetch(path) {
-    const res = await fetch(API + path, { headers: authHeaders() });
-    if (res.status === 401) { doLogout(); throw new Error('Unauthorized'); }
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
-  }
-
-  // ---- METRICS ----
-  async function loadMetrics() {
-    document.getElementById('metrics-grid').innerHTML = '<div class="loading">Carregando...</div>';
-    document.getElementById('tag-breakdown-section').style.display = 'none';
-    try {
-      const d = await apiFetch('/api/dashboard/metrics');
-      const grid = document.getElementById('metrics-grid');
-      grid.innerHTML = `
-        <div class="metric-card"><div class="label">Leads hoje</div><div class="value accent">${d.todayCount ?? 0}</div></div>
-        <div class="metric-card"><div class="label">Total de leads</div><div class="value">${d.totalLeads ?? 0}</div></div>
-        <div class="metric-card"><div class="label">Agendamentos</div><div class="value">${d.scheduledCount ?? 0}</div></div>
-        <div class="metric-card"><div class="label">Taxa conversão</div><div class="value">${d.conversionRate ?? '0%'}</div></div>
-      `;
-      if (d.tagBreakdown && Object.keys(d.tagBreakdown).length > 0) {
-        const tagEl = document.getElementById('tag-list');
-        tagEl.innerHTML = Object.entries(d.tagBreakdown)
-          .sort((a, b) => b[1] - a[1])
-          .map(([tag, count]) => `<div class="tag-item">${tag}<span>${count}</span></div>`)
-          .join('');
-        document.getElementById('tag-breakdown-section').style.display = 'block';
-      }
-    } catch (e) {
-      document.getElementById('metrics-grid').innerHTML = '<div class="empty">Erro ao carregar métricas.</div>';
-    }
-  }
-
-  // ---- CONVERSATIONS ----
-  async function loadConversations() {
-    document.getElementById('conv-tbody').innerHTML = '<tr><td colspan="6" class="loading">Carregando...</td></tr>';
-    try {
-      const list = await apiFetch('/api/dashboard/conversations');
-      const tbody = document.getElementById('conv-tbody');
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhuma conversa encontrada.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = list.map(c => `
-        <tr onclick="openConversation('${esc(c.phone)}', '${esc(c.leadName || c.phone)}')">
-          <td class="phone">${esc(c.phone)}</td>
-          <td>${esc(c.leadName || '—')}</td>
-          <td>${c.tag ? '<span class="badge badge-tag">' + esc(c.tag) + '</span>' : '—'}</td>
-          <td><span class="badge ${c.active ? 'badge-active' : 'badge-closed'}">${c.active ? 'Ativo' : 'Encerrado'}</span></td>
-          <td>${c.messageCount ?? 0}</td>
-          <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">${esc(c.lastMessage || '')}</td>
-        </tr>
-      `).join('');
-    } catch (e) {
-      document.getElementById('conv-tbody').innerHTML = '<tr><td colspan="6" class="empty">Erro ao carregar conversas.</td></tr>';
-    }
-  }
-
-  async function openConversation(phone, name) {
-    document.getElementById('modal-title').textContent = name + ' · ' + phone;
-    document.getElementById('modal-chat').innerHTML = '<div class="loading">Carregando...</div>';
-    document.getElementById('modal-overlay').classList.add('open');
-    try {
-      const data = await apiFetch('/api/dashboard/conversation?phone=' + encodeURIComponent(phone));
-      const history = (data && data.history) ? data.history : [];
-      const chatEl = document.getElementById('modal-chat');
-      if (!history.length) {
-        chatEl.innerHTML = '<div class="empty">Sem mensagens.</div>';
-        return;
-      }
-      chatEl.innerHTML = history.map(m => `
-        <div class="msg ${m.role}">
-          <div class="role-label">${m.role === 'user' ? 'Lead' : 'Fabio IA'}</div>
-          ${esc(m.content)}
+// CONVERSAS
+function renderConversationList() {
+  const q = ($('conv-search')||{value:''}).value.toLowerCase();
+  const list = STATE.conversations.filter(c =>
+    !q || (c.leadName||'').toLowerCase().includes(q) || (c.phone||'').includes(q)
+  );
+  const el = $('conv-items');
+  if(!list.length) { el.innerHTML = '<div class="empty-state">Nenhuma conversa encontrada</div>'; return; }
+  el.innerHTML = list.map(c => `
+    <div class="conv-item ${STATE.selectedPhone===c.phone?'active':''}" onclick="openConversation('${c.phone}')">
+      <div class="conv-avatar">${(c.leadName||'?')[0].toUpperCase()}</div>
+      <div class="conv-info">
+        <div class="conv-row1">
+          <span class="conv-name">${c.leadName||c.phone}</span>
+          <span class="conv-time">${timeAgo(c.updatedAt)}</span>
         </div>
-      `).join('');
-      chatEl.scrollTop = chatEl.scrollHeight;
-    } catch (e) {
-      document.getElementById('modal-chat').innerHTML = '<div class="empty">Erro ao carregar conversa.</div>';
+        <div class="conv-preview">${c.lastMessage||'—'}</div>
+        <div class="conv-badges">${badge(c.status)} ${badge(c.tag)}</div>
+      </div>
+    </div>`).join('');
+  feather.replace();
+}
+
+function filterConversations() { renderConversationList(); }
+
+async function openConversation(phone) {
+  STATE.selectedPhone = phone;
+  renderConversationList();
+  const area = $('chat-area');
+  area.innerHTML = '<div style="padding:24px;color:var(--text-muted)">Carregando...</div>';
+  try {
+    const r = await fetch(`/api/dashboard/conversation?phone=${phone}`, { headers: apiHeaders() });
+    const data = await r.json();
+    const conv = STATE.conversations.find(c=>c.phone===phone)||{};
+    const lead = STATE.leads.find(l=>(l.telefone||'').replace(/\D/g,'')===(phone||'').replace(/\D/g,''))||{};
+    if(data && data.history && data.history.length > 0) {
+      area.innerHTML = `
+        <div class="chat-header">
+          <div class="chat-avatar">${(conv.leadName||lead.nome||'?')[0].toUpperCase()}</div>
+          <div>
+            <div class="chat-name">${conv.leadName||lead.nome||phone}</div>
+            <div class="chat-phone">${fmtPhone(phone)}</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:6px">${badge(conv.status)} ${badge(conv.tag)}</div>
+        </div>
+        <div class="chat-messages" id="chat-msgs">
+          ${data.history.map(m=>`
+            <div class="msg-wrap ${m.role}">
+              ${m.role==='assistant'?'<div class="msg-sender">Fabio · Cimerian</div>':''}
+              <div class="msg-bubble">${(m.content||'').replace(/\n/g,'<br>')}</div>
+              <div class="msg-time">${m.role==='user'?'Lead':'Agente'}</div>
+            </div>`).join('')}
+        </div>`;
+      setTimeout(()=>{ const m=$('chat-msgs'); if(m) m.scrollTop=m.scrollHeight; },100);
+    } else {
+      area.innerHTML = `
+        <div class="chat-header">
+          <div class="chat-avatar">${(lead.nome||conv.leadName||'?')[0].toUpperCase()}</div>
+          <div>
+            <div class="chat-name">${lead.nome||conv.leadName||phone}</div>
+            <div class="chat-phone">${fmtPhone(phone)}</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:6px">${badge(conv.status||lead.status)} ${badge(conv.tag||lead.tag)}</div>
+        </div>
+        <div class="lead-data-card">
+          <div class="card-title">Dados do Lead</div>
+          <div class="lead-data-grid">
+            ${[['Nome',lead.nome||'—'],['Cidade/UF',(lead.cidade||'')+(lead.estado?' · '+lead.estado:'')],['Perfil',lead.perfil||'—'],['Academia',lead.nome_academia||'—'],['Proprietário',lead.proprietario||'—'],['Faturamento',fmt(lead.faturamento_mensal)],['Catálogo',lead.quer_catalogo||'—'],['Agendamento',lead.agendamento||'—']].map(([l,v])=>`
+              <div class="lead-data-item"><label>${l}</label><p>${v}</p></div>`).join('')}
+          </div>
+        </div>`;
     }
+  } catch(e) {
+    area.innerHTML = '<div style="padding:24px;color:var(--text-muted)">Erro ao carregar conversa</div>';
   }
+  feather.replace();
+}
 
-  function closeModal() {
-    document.getElementById('modal-overlay').classList.remove('open');
-  }
+// LEADS TABLE
+function renderLeadsTable() {
+  const st = ($('f-status')||{value:''}).value;
+  const tg = ($('f-tag')||{value:''}).value;
+  const pf = ($('f-perfil')||{value:''}).value;
+  const bq = ($('f-busca')||{value:''}).value.toLowerCase();
+  const rows = STATE.leads.filter(l =>
+    (!st || l.status===st) && (!tg || l.tag===tg) && (!pf || l.perfil===pf) &&
+    (!bq || (l.nome||'').toLowerCase().includes(bq) || (l.telefone||'').includes(bq))
+  );
+  const tb = $('leads-tbody');
+  if(!tb) return;
+  if(!rows.length) { tb.innerHTML = '<tr><td colspan="9" class="empty-state">Nenhum lead encontrado</td></tr>'; return; }
+  tb.innerHTML = rows.map(l => `<tr>
+    <td style="font-weight:600">${l.nome||'—'}</td>
+    <td style="color:var(--text-muted)">${fmtPhone(l.telefone)}</td>
+    <td>${l.cidade||'—'}</td>
+    <td>${l.estado ? `<span class="badge" style="background:var(--primary-light);color:var(--primary)">${l.estado}</span>` : '—'}</td>
+    <td>${badge(l.perfil)}</td>
+    <td>${fmt(l.faturamento_mensal)}</td>
+    <td>${badge(l.tag)}</td>
+    <td>${badge(l.status)}</td>
+    <td style="color:var(--text-muted);font-size:12px">${l.agendamento||'—'}</td>
+  </tr>`).join('');
+}
 
-  function closeModalOutside(e) {
-    if (e.target === document.getElementById('modal-overlay')) closeModal();
-  }
+// MÉTRICAS
+function renderMetrics() {
+  const leads = STATE.leads;
+  if(!leads.length) return;
+  const todayStr = new Date().toLocaleDateString('pt-BR');
+  const hoje = leads.filter(l => (l.timestamp||'').startsWith(todayStr.split('/').reverse().join('-').slice(0,10)) || (l.timestamp||'').includes(todayStr.split('/')[0]+'/'+todayStr.split('/')[1]+'/'+todayStr.split('/')[2])).length || leads.filter(l => { try { const d = new Date(l.timestamp); return d.toLocaleDateString('pt-BR')===todayStr; } catch(e){return false;} }).length;
+  const total = leads.length;
+  const agend = leads.filter(l=>l.status==='agendado').length;
+  const taxa = total > 0 ? Math.round(agend/total*100) : 0;
+  const em_and = leads.filter(l=>l.status==='em_andamento'||l.status==='iniciado').length;
 
-  // ---- LEADS ----
-  async function loadLeads() {
-    document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="loading">Carregando...</td></tr>';
-    try {
-      allLeads = await apiFetch('/api/dashboard/leads');
-      renderLeads(allLeads);
-    } catch (e) {
-      document.getElementById('leads-tbody').innerHTML = '<tr><td colspan="8" class="empty">Erro ao carregar leads.</td></tr>';
-    }
-  }
+  $('m-hoje').textContent = leads.filter(l => { try { return new Date(l.timestamp).toDateString()===new Date().toDateString(); } catch(e){return false;} }).length || hoje || total;
+  $('m-total').textContent = total;
+  $('m-agend').textContent = agend;
+  $('m-taxa').textContent = taxa + '%';
+  $('f-init').textContent = total;
+  $('f-prog').textContent = em_and;
+  $('f-prog-p').textContent = total > 0 ? Math.round(em_and/total*100)+'%' : '0%';
+  $('f-agend').textContent = agend;
+  $('f-agend-p').textContent = taxa+'%';
 
-  function filterLeads() {
-    const q = document.getElementById('lead-search').value.toLowerCase();
-    if (!q) { renderLeads(allLeads); return; }
-    renderLeads(allLeads.filter(l =>
-      (l.nome || '').toLowerCase().includes(q) ||
-      (l.telefone || '').toLowerCase().includes(q)
-    ));
-  }
+  // UF
+  const ufs = {}; leads.forEach(l => { if(l.estado) ufs[l.estado] = (ufs[l.estado]||0)+1; });
+  const sortedUFs = Object.entries(ufs).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxUF = sortedUFs[0]?.[1]||1;
+  $('chart-uf').innerHTML = sortedUFs.map(([uf,n])=>`
+    <div class="uf-item">
+      <div class="uf-badge">${uf}</div>
+      <div class="bar-track" style="flex:1"><div class="bar-fill" style="background:var(--blue);width:${n/maxUF*100}%"></div></div>
+      <span class="bar-num">${n}</span>
+    </div>`).join('') || '<p style="color:var(--text-muted);font-size:13px">Sem dados</p>';
 
-  function renderLeads(list) {
-    const tbody = document.getElementById('leads-tbody');
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum lead encontrado.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = list.map(l => `
-      <tr>
-        <td style="color:#8696a0;font-size:12px">${esc(l.timestamp || '—')}</td>
-        <td class="phone">${esc(l.telefone || '—')}</td>
-        <td>${esc(l.nome || '—')}</td>
-        <td style="color:#8696a0">${esc([l.cidade, l.estado].filter(Boolean).join('/') || '—')}</td>
-        <td style="color:#8696a0">${esc(l.perfil || '—')}</td>
-        <td>${l.tag ? '<span class="badge badge-tag">' + esc(l.tag) + '</span>' : '—'}</td>
-        <td>${esc(l.status || '—')}</td>
-        <td style="font-size:12px;color:#8696a0">${esc(l.agendamento || '—')}</td>
-      </tr>
-    `).join('');
-  }
+  // TAG
+  const tags = {'Padrao':0,'Cardio':0,'Layout':0,'10%+48x':0};
+  leads.forEach(l => { if(tags.hasOwnProperty(l.tag)) tags[l.tag]++; });
+  const tagColors = {'Padrao':'var(--blue)','Cardio':'var(--green)','Layout':'var(--purple)','10%+48x':'var(--yellow)'};
+  const tagLabels = {'Padrao':'Padrão','Cardio':'Cardio','Layout':'Layout','10%+48x':'10%+48x'};
+  const maxTag = Math.max(...Object.values(tags))||1;
+  $('chart-tag').innerHTML = Object.entries(tags).map(([t,n])=>`
+    <div class="bar-item">
+      <span class="bar-label">${tagLabels[t]}</span>
+      <div class="bar-track"><div class="bar-fill" style="background:${tagColors[t]};width:${n/maxTag*100}%"></div></div>
+      <span class="bar-num">${n}</span>
+    </div>`).join('');
 
-  function esc(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  // COHORT
+  const cohorts = { A:{min:500001,max:Infinity,label:'A',color:'var(--primary)',range:'+R$500k',count:0}, B:{min:250001,max:500000,label:'B',color:'var(--yellow)',range:'R$250k–500k',count:0}, C:{min:100001,max:250000,label:'C',color:'var(--blue)',range:'R$100k–250k',count:0}, D:{min:0,max:100000,label:'D',color:'var(--text-muted)',range:'até R$100k',count:0}, Consumo:{label:'Consumo',color:'var(--purple)',range:'Uso pessoal',count:0} };
+  leads.forEach(l => {
+    if(l.perfil==='pessoal') { cohorts.Consumo.count++; return; }
+    const f = Number(l.faturamento_mensal)||0;
+    if(f > 500000) cohorts.A.count++;
+    else if(f > 250000) cohorts.B.count++;
+    else if(f > 100000) cohorts.C.count++;
+    else cohorts.D.count++;
+  });
+  $('chart-cohort').innerHTML = Object.entries(cohorts).map(([k,c])=>`
+    <div class="cohort-item">
+      <div class="cohort-letter" style="background:${c.color}20;color:${c.color}">${c.label}</div>
+      <div class="cohort-info">
+        <div class="cohort-range">${c.range}</div>
+        <div class="cohort-count" style="color:${c.color}">${c.count}</div>
+      </div>
+      ${(k==='A'||k==='B') && c.count > 0 ? '<span class="priority-badge">Prioridade</span>' : ''}
+    </div>`).join('');
 
-  init();
+  // PERFIL
+  const acad = leads.filter(l=>l.perfil==='academia').length;
+  const pess = leads.filter(l=>l.perfil==='pessoal').length;
+  $('chart-perfil').innerHTML = `
+    <div class="perfil-box" style="background:rgba(16,185,129,0.08)">
+      <div class="pct" style="color:var(--green)">${total>0?Math.round(acad/total*100):0}%</div>
+      <div class="lbl" style="color:var(--green)">Academia</div>
+      <div class="num">${acad} leads</div>
+    </div>
+    <div class="perfil-box" style="background:rgba(59,130,246,0.08)">
+      <div class="pct" style="color:var(--blue)">${total>0?Math.round(pess/total*100):0}%</div>
+      <div class="lbl" style="color:var(--blue)">Pessoal</div>
+      <div class="num">${pess} leads</div>
+    </div>`;
+
+  // INTERESSE
+  const inter = {}; leads.forEach(l => { if(l.interesse_equipamento) { const k = l.interesse_equipamento.slice(0,30); inter[k]=(inter[k]||0)+1; } });
+  const sortedInter = Object.entries(inter).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxInter = sortedInter[0]?.[1]||1;
+  $('chart-interesse').innerHTML = sortedInter.map(([t,n])=>`
+    <div class="bar-item">
+      <span class="bar-label" style="min-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t}</span>
+      <div class="bar-track"><div class="bar-fill" style="background:var(--purple);width:${n/maxInter*100}%"></div></div>
+      <span class="bar-num">${n}</span>
+    </div>`).join('') || '<p style="color:var(--text-muted);font-size:13px">Sem dados</p>';
+
+  feather.replace();
+}
+
+// CSV
+function exportCSV() {
+  const st = $('f-status').value, tg = $('f-tag').value, pf = $('f-perfil').value, bq = $('f-busca').value.toLowerCase();
+  const rows = STATE.leads.filter(l => (!st||l.status===st)&&(!tg||l.tag===tg)&&(!pf||l.perfil===pf)&&(!bq||(l.nome||'').toLowerCase().includes(bq)||(l.telefone||'').includes(bq)));
+  const cols = ['timestamp','telefone','nome','cidade','estado','perfil','nome_academia','proprietario','faturamento_mensal','interesse_equipamento','quer_catalogo','agendamento','status','tag'];
+  const csv = [cols.join(','), ...rows.map(r => cols.map(c => `"${(r[c]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download = 'leads_cimerian.csv'; a.click();
+}
+
+// ENTER para login
+document.addEventListener('keydown', e => { if(e.key==='Enter' && $('login-screen').style.display!=='none') doLogin(); });
+
+// AUTO-REFRESH
+setInterval(() => { if(STATE.token) { loadConversations(); loadLeads(); } }, 60000);
+
+// INIT
+window.onload = init;
 </script>
 </body>
 </html>
