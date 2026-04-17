@@ -2,6 +2,7 @@
   "version": 2,
   "builds": [
     { "src": "api/webhook.ts",                 "use": "@vercel/node" },
+    { "src": "api/cron.ts",                    "use": "@vercel/node" },
     { "src": "api/dashboard/login.ts",         "use": "@vercel/node" },
     { "src": "api/dashboard/conversations.ts", "use": "@vercel/node" },
     { "src": "api/dashboard/conversation.ts",  "use": "@vercel/node" },
@@ -11,11 +12,18 @@
   ],
   "routes": [
     { "src": "/api/webhook",                    "dest": "/api/webhook.ts"                 },
+    { "src": "/api/cron",                       "dest": "/api/cron.ts"                    },
     { "src": "/api/dashboard/login",            "dest": "/api/dashboard/login.ts"         },
     { "src": "/api/dashboard/conversations",    "dest": "/api/dashboard/conversations.ts" },
     { "src": "/api/dashboard/conversation",     "dest": "/api/dashboard/conversation.ts"  },
     { "src": "/api/dashboard/leads",            "dest": "/api/dashboard/leads.ts"         },
     { "src": "/api/dashboard/metrics",          "dest": "/api/dashboard/metrics.ts"       },
     { "src": "/dashboard",                      "dest": "/public/dashboard.html"          }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "*/5 * * * *"
+    }
   ]
 }

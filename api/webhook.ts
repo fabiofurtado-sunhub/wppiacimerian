@@ -3,6 +3,7 @@ import { handleMessage, extractPartialData } from '../lib/agent';
 import { getSession, saveSession, clearSession } from '../lib/session';
 import { sendMessage } from '../lib/zapi';
 import { upsertLead } from '../lib/sheets';
+import { scheduleFollowUp, cancelFollowUp } from '../lib/followup';
 
 const TRIGGERS = [
   { keywords: ['orcamento dos equipamentos em estoque'], tag: 'Padrao' },
@@ -74,6 +75,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const session = await getSession(phone);
     console.log('[webhook] session.active:', session.active);
 
+    // Lead respondeu — cancela cadência de follow-up ativa
+    await cancelFollowUp(phone);
+
     // Sem sessão ativa: verifica gatilho
     if (!session.active) {
       const triggered = isTrigger(text);
@@ -84,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Inicia sessão
       session.active = true;
       session.leadName = name;
-      session.nomeWhatsapp = name; // fallback: nome do WhatsApp, será substituído pelo nome real informado na conversa
+      session.nomeWhatsapp = name;
       session.phone = phone;
       session.history = [];
       session.tag = getTriggerTag(text);
@@ -93,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       session.utm_campaign = '';
       session.utm_content = '';
 
-      // MOMENTO 1 — salva lead ao entrar no funil (nome vazio: será preenchido pela IA durante a conversa)
+      // MOMENTO 1 — salva lead ao entrar no funil
       console.log('[sheets] MOMENTO 1 - iniciando upsert gatilho');
       await upsertLead({
         phone,
@@ -102,6 +106,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         tag: session.tag,
         status: 'iniciado',
       });
+
+      // Agenda cadência de follow-up
+      await scheduleFollowUp(phone, name);
     }
 
     const now = new Date().toLocaleString('pt-BR', {
@@ -133,6 +140,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         utm_content: session.utm_content || '',
       });
       await clearSession(phone);
+
+      // Cancela follow-up se agendou ou finalizou
+      if (leadData.status === 'agendado' || leadData.status === 'catalogo_enviado') {
+        await cancelFollowUp(phone);
+      }
     } else {
       // INCREMENTAL — salva após cada resposta do agente para não perder dados
       const partialNow = await extractPartialData(sessionUpdated.history);
