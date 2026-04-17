@@ -27,16 +27,18 @@ export async function upsertLead(lead: Record<string, string>): Promise<void> {
 
     const nomeParaSalvar = (lead.nome && lead.nome.trim() !== '') ? lead.nome : (lead.nomeWhatsapp || '');
 
+    // Colunas A–S (19 colunas):
+    // A=timestamp, B=phone, C=nome, D=perfil, E=nome_academia, F=proprietario,
+    // G=pronta_entrega, H=interesse_equipamento, I=quer_catalogo, J=agendamento,
+    // K=status, L=tag, M=utm_source, N=utm_medium, O=utm_campaign, P=utm_content
     const row = [
       lead.timestamp || now,
       lead.phone || '',
       nomeParaSalvar,
-      lead.cidade || '',
-      lead.estado || '',
       lead.perfil || '',
       lead.nome_academia || '',
       lead.proprietario || '',
-      lead.faturamento_mensal != null && lead.faturamento_mensal !== '' ? String(lead.faturamento_mensal) : '',
+      lead.pronta_entrega || '',
       lead.interesse_equipamento || '',
       lead.quer_catalogo || '',
       lead.agendamento || '',
@@ -52,7 +54,7 @@ export async function upsertLead(lead: Record<string, string>): Promise<void> {
       const sheetRow = rowIndex + 1;
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `Leads_Ads!A${sheetRow}:R${sheetRow}`,
+        range: `Leads_Ads!A${sheetRow}:P${sheetRow}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [row] },
       });
@@ -60,7 +62,7 @@ export async function upsertLead(lead: Record<string, string>): Promise<void> {
     } else {
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: 'Leads_Ads!A:R',
+        range: 'Leads_Ads!A:P',
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [row] },
       });
@@ -68,41 +70,5 @@ export async function upsertLead(lead: Record<string, string>): Promise<void> {
     }
   } catch (err) {
     console.error('[sheets] erro no upsert:', err);
-  }
-}
-
-export async function saveLeadToSheets(lead: Record<string, string>): Promise<void> {
-  console.log('[sheets] tentando salvar lead:', JSON.stringify(lead));
-  try {
-    const sheets = await getSheets();
-    const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    const row = [
-      now,
-      lead.phone || '',
-      lead.nome || '',
-      lead.cidade || '',
-      lead.estado || '',
-      lead.perfil || '',
-      lead.nome_academia || '',
-      lead.proprietario || '',
-      lead.faturamento_mensal != null && lead.faturamento_mensal !== '' ? String(lead.faturamento_mensal) : '',
-      lead.interesse_equipamento || '',
-      lead.quer_catalogo || '',
-      lead.agendamento || '',
-      lead.status || '',
-      lead.tag || '',
-      lead.utm_source || '',
-      lead.utm_medium || '',
-      lead.utm_campaign || '',
-      lead.utm_content || '',
-    ];
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: 'Leads_Ads!A:R',
-      valueInputOption: 'USER_ENTERED',
-      requestBody: { values: [row] },
-    });
-  } catch (err) {
-    console.error('[sheets] erro ao salvar:', err);
   }
 }

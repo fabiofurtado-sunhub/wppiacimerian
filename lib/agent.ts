@@ -42,6 +42,7 @@ ${isWeekend ? 'ATENÇÃO: Hoje é fim de semana. NÃO ofereça contato imediato.
 
   const replyLower = reply.toLowerCase();
   const isEnded =
+    replyLower.includes('grande abs') ||
     replyLower.includes('até lá') ||
     replyLower.includes('até logo') ||
     replyLower.includes('obrigado pelo interesse na cimerian') ||
@@ -75,10 +76,8 @@ export async function extractPartialData(
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 256,
       system: `Você é um extrator de dados parciais. Analise a conversa e retorne SOMENTE um JSON válido com os campos coletados até agora. Campos ainda desconhecidos deixe como string vazia. Se nenhum dado relevante foi coletado além da saudação, retorne exatamente: null
-Cidade e estado devem ser sempre separados em campos distintos. Exemplos: "Londrina PR" → cidade: "Londrina", estado: "PR" | "Londrina, Paraná" → cidade: "Londrina", estado: "PR" | "São Paulo SP" → cidade: "São Paulo", estado: "SP" | "Belo Horizonte - MG" → cidade: "Belo Horizonte", estado: "MG". Use sempre a sigla de 2 letras maiúsculas para estado.
-Corrija erros de digitação comuns automaticamente. Exemplos: "londrina", "Londrina", "londrina pr" → cidade: "Londrina", estado: "PR" | "sao paulo", "São Paulo", "SP" → cidade: "São Paulo", estado: "SP" | "bh", "belo horizonte" → cidade: "Belo Horizonte", estado: "MG" | "rj", "rio" → cidade: "Rio de Janeiro", estado: "RJ". Estado deve ser SEMPRE a sigla UF com 2 letras maiúsculas. Nunca escrever o nome completo do estado.
 Formato:
-{"nome":"","cidade":"","estado":"","perfil":"","nome_academia":"","proprietario":"","faturamento_mensal":"","interesse_equipamento":""}`,
+{"nome":"","perfil":"","nome_academia":"","proprietario":"","pronta_entrega":"","quer_catalogo":"","agendamento":"","status":""}`,
       messages: [{ role: 'user', content: `Conversa: ${JSON.stringify(history)}` }],
     });
 
@@ -105,19 +104,13 @@ async function extractLeadData(
       model: 'claude-sonnet-4-20250514',
       max_tokens: 512,
       system: `Você é um extrator de dados. Analise a conversa e retorne SOMENTE um JSON válido, sem texto adicional, sem markdown, sem backticks.
-O campo faturamento_mensal deve ser sempre um número inteiro em reais, sem símbolos. Exemplos de conversão: "cinquenta mil" → 50000, "R$50k" → 50000, "50 mil reais" → 50000, "250.000" → 250000, "não informado" → 0.
-Cidade e estado devem ser sempre separados em campos distintos. Exemplos: "Londrina PR" → cidade: "Londrina", estado: "PR" | "Londrina, Paraná" → cidade: "Londrina", estado: "PR" | "São Paulo SP" → cidade: "São Paulo", estado: "SP" | "Belo Horizonte - MG" → cidade: "Belo Horizonte", estado: "MG". Use sempre a sigla de 2 letras maiúsculas para estado.
-Corrija erros de digitação comuns automaticamente. Exemplos: "londrina", "Londrina", "londrina pr" → cidade: "Londrina", estado: "PR" | "sao paulo", "São Paulo", "SP" → cidade: "São Paulo", estado: "SP" | "bh", "belo horizonte" → cidade: "Belo Horizonte", estado: "MG" | "rj", "rio" → cidade: "Rio de Janeiro", estado: "RJ". Estado deve ser SEMPRE a sigla UF com 2 letras maiúsculas. Nunca escrever o nome completo do estado.
 Campos obrigatórios:
 {
   "nome": "",
-  "cidade": "",
-  "estado": "",
   "perfil": "pessoal|academia",
   "nome_academia": "",
   "proprietario": "sim|não|não informado",
-  "faturamento_mensal": 0,
-  "interesse_equipamento": "",
+  "pronta_entrega": "sim|não|em construção|não informado",
   "quer_catalogo": "sim|não",
   "agendamento": "",
   "status": "agendado|catalogo_enviado|desistiu|incompleto"
@@ -135,12 +128,7 @@ Campos obrigatórios:
       .map((b) => b.text)
       .join('');
 
-    const data = JSON.parse(raw);
-    // Garante que faturamento_mensal seja string para não ser perdido como falsy (0)
-    if (data !== null && typeof data.faturamento_mensal === 'number') {
-      data.faturamento_mensal = String(data.faturamento_mensal);
-    }
-    return data;
+    return JSON.parse(raw);
   } catch {
     return null;
   }
