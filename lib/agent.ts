@@ -100,10 +100,20 @@ async function extractLeadData(
   history: { role: string; content: string }[]
 ): Promise<Record<string, string> | null> {
   try {
+    const hoje = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     const extraction = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 512,
       system: `Você é um extrator de dados. Analise a conversa e retorne SOMENTE um JSON válido, sem texto adicional, sem markdown, sem backticks.
+
+O campo agendamento deve ser sempre uma data e hora completa e formatada.
+A data de hoje é: ${hoje}
+Exemplos de conversão:
+- "amanhã às nove da manhã" → calcule a data real de amanhã e formate como: "22/04/2026 09:00"
+- "segunda-feira às dez da manhã" → calcule a data real da próxima segunda e formate como: "27/04/2026 10:00"
+- "hoje às três da tarde" → formate como: "${hoje} 15:00"
+SEMPRE retorne no formato DD/MM/YYYY HH:MM — nunca retorne texto como "amanhã" ou "segunda-feira".
+
 Campos obrigatórios:
 {
   "nome": "",
