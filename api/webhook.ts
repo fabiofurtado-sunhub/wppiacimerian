@@ -111,15 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await scheduleFollowUp(phone, name);
     }
 
-    const now = new Date().toLocaleString('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      weekday: 'long',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-    const isWeekend = [0, 6].includes(new Date().getDay());
-
-    const { reply, sessionUpdated, leadData } = await handleMessage(text, session, now, isWeekend);
+    const { reply, sessionUpdated, leadData } = await handleMessage(text, session);
 
     await saveSession(phone, sessionUpdated);
     await sendMessage(phone, reply);

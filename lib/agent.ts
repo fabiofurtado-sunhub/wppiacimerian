@@ -12,19 +12,37 @@ interface HandleResult {
 
 export async function handleMessage(
   text: string,
-  session: Session,
-  currentDateTime: string,
-  isWeekend: boolean
+  session: Session
 ): Promise<HandleResult> {
   const history = [...session.history, { role: 'user' as const, content: text }];
 
-  const systemWithContext = `${SYSTEM_PROMPT}
+  const nowBR = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long', hour: 'numeric', minute: 'numeric' });
+  const dateBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const day = dateBR.getDay();
 
-[CONTEXTO ATUAL DO SISTEMA]
-Data e hora atual: ${currentDateTime}
-É fim de semana: ${isWeekend ? 'SIM' : 'NÃO'}
-${isWeekend ? 'ATENÇÃO: Hoje é fim de semana. NÃO ofereça contato imediato. NÃO ofereça horários de hoje ou amanhã se cair no fim de semana. Ofereça APENAS segunda-feira.' : ''}
-`;
+  let proximoDiaUtil = '';
+  if (day === 5) {
+    const seg = new Date(dateBR);
+    seg.setDate(dateBR.getDate() + 3);
+    proximoDiaUtil = 'segunda-feira, ' + seg.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+  } else if (day === 6) {
+    const seg = new Date(dateBR);
+    seg.setDate(dateBR.getDate() + 2);
+    proximoDiaUtil = 'segunda-feira, ' + seg.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+  } else if (day === 0) {
+    const seg = new Date(dateBR);
+    seg.setDate(dateBR.getDate() + 1);
+    proximoDiaUtil = 'segunda-feira, ' + seg.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+  }
+
+  const ctx = `
+
+[CONTEXTO DO SISTEMA]
+Agora: ${nowBR}
+É fim de semana: ${[0, 6].includes(day) || day === 5 ? 'SIM' : 'NÃO'}
+${proximoDiaUtil ? `ATENÇÃO: Hoje é ${day === 5 ? 'sexta-feira' : 'fim de semana'}. O próximo dia útil disponível para agendamento é ${proximoDiaUtil}. NUNCA ofereça sábado ou domingo. Use APENAS ${proximoDiaUtil} como opção de data.` : `Próximo dia útil: amanhã`}`;
+
+  const systemWithContext = `${SYSTEM_PROMPT}${ctx}`;
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
