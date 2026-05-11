@@ -11,6 +11,7 @@ export interface Session {
   utm_medium: string;
   utm_campaign: string;
   utm_content: string;
+  timestamp?: string;
 }
 
 const redis = new Redis({
